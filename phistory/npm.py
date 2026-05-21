@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from phistory.models import AgentSpec, VersionInfo
 from phistory.subprocesses import run
+
+_PLATFORM_VERSION_RE = re.compile(r"-(darwin|linux|win32)-(x64|arm64)$")
 
 
 def npm_view(package: str, *fields: str) -> object:
@@ -27,19 +30,24 @@ def latest_version(agent: AgentSpec) -> VersionInfo:
     )
 
 
-def all_versions(agent: AgentSpec) -> list[VersionInfo]:
+def all_versions(agent: AgentSpec, *, include_prerelease: bool = False) -> list[VersionInfo]:
     data = npm_view(agent.package, "versions", "time")
     if not isinstance(data, dict) or not isinstance(data.get("versions"), list):
         raise RuntimeError(f"unexpected npm versions shape for {agent.package}: {data!r}")
     times = data.get("time") if isinstance(data.get("time"), dict) else {}
-    return [
+    versions = [
         VersionInfo(version=str(version), published_at=str(times.get(version)) if times.get(version) else None)
         for version in data["versions"]
     ]
+    return [
+        version
+        for version in versions
+        if _is_archivable_version(version.version, include_prerelease=include_prerelease)
+    ]
 
 
-def versions_between(agent: AgentSpec, start: str, end: str) -> list[VersionInfo]:
-    versions = all_versions(agent)
+def versions_between(agent: AgentSpec, start: str, end: str, *, include_prerelease: bool = False) -> list[VersionInfo]:
+    versions = all_versions(agent, include_prerelease=include_prerelease)
     if end == "latest":
         end = versions[-1].version
     start_idx = _index_of(versions, start)
@@ -64,3 +72,11 @@ def _index_of(versions: list[VersionInfo], version: str) -> int:
         if item.version == version:
             return idx
     raise ValueError(f"version not found: {version}")
+
+
+def _is_archivable_version(version: str, *, include_prerelease: bool) -> bool:
+    if _PLATFORM_VERSION_RE.search(version):
+        return False
+    if not include_prerelease and "-" in version:
+        return False
+    return True

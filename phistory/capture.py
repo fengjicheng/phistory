@@ -74,7 +74,7 @@ def capture_target(
                 "tap_client": target.agent.tap_client,
                 "target": upstream,
                 "duration_seconds": round(time.time() - started, 3),
-                "command": argv,
+                "command": _portable_command(argv, version_dir),
             },
         )
         if not keep_tap:
@@ -102,6 +102,23 @@ def _binary_version(target: CaptureTarget, bin_dir: Path) -> str | None:
     result = run([str(executable), "--version"], env=_capture_env(target, bin_dir), timeout=30, check=False)
     text = (result.stdout or result.stderr).strip()
     return text or None
+
+
+def _portable_command(argv: list[str], version_dir: Path) -> list[str]:
+    out: list[str] = []
+    for index, arg in enumerate(argv):
+        if index == 0:
+            out.append("python")
+            continue
+        path = Path(arg)
+        if path.is_absolute():
+            try:
+                out.append(path.relative_to(version_dir).as_posix())
+                continue
+            except ValueError:
+                pass
+        out.append(arg)
+    return out
 
 
 def _iso_now() -> str:

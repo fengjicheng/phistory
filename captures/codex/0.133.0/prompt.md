@@ -3,11 +3,11 @@
 - **Provider**: openai
 - **Model**: gpt-5.4
 - **Path**: /v1/responses
-- **Upstream**: http://127.0.0.1:29771
+- **Upstream**: http://127.0.0.1:34665
 - **Turn**: 2
-- **Request ID**: req_fa6a1e02795e
-- **Captured**: 2026-05-21T17:24:25.002792+00:00
-- **Tools**: 18
+- **Request ID**: req_6c2b64be08f5
+- **Captured**: 2026-05-21T17:25:52.556203+00:00
+- **Tools**: 17
 
 # System Prompt
 
@@ -157,7 +157,7 @@ A skill is a set of local instructions to follow that is stored in a `SKILL.md` 
 ### Available skills
 - imagegen: Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas. (file: /data00/home/liangweifeng/.codex/skills/.system/imagegen/SKILL.md)
 - openai-docs: Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, help choosing the latest model for a use case, or model upgrade and prompt-upgrade guidance; prioritize OpenAI docs MCP tools, use bundled references only as helper context, and restrict any fallback browsing to official OpenAI domains. (file: /data00/home/liangweifeng/.codex/skills/.system/openai-docs/SKILL.md)
-- plugin-creator: Create and scaffold plugin directories for Codex with a required `.codex-plugin/plugin.json`, optional plugin folders/files, valid manifest defaults, and personal-marketplace entries by default. Use when Codex needs to create a new personal plugin, add optional plugin structure, or generate or update marketplace entries for plugin ordering and availability metadata. (file: /data00/home/liangweifeng/.codex/skills/.system/plugin-creator/SKILL.md)
+- plugin-creator: Create and scaffold plugin directories for Codex with a required `.codex-plugin/plugin.json`, optional plugin folders/files, valid manifest defaults, and personal-marketplace entries by default. Use when Codex needs to create a new personal plugin, add optional plugin structure, generate or update marketplace entries for plugin ordering and availability metadata, or update an existing local plugin during development with the CLI-driven cachebuster and reinstall flow. (file: /data00/home/liangweifeng/.codex/skills/.system/plugin-creator/SKILL.md)
 - skill-creator: Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Codex's capabilities with specialized knowledge, workflows, or tool integrations. (file: /data00/home/liangweifeng/.codex/skills/.system/skill-creator/SKILL.md)
 - skill-installer: Install Codex skills into $CODEX_HOME/skills from a curated list or a GitHub repo path. Use when a user asks to list installable skills, install a curated skill, or install a skill from another repo (including private repos). (file: /data00/home/liangweifeng/.codex/skills/.system/skill-installer/SKILL.md)
 - bytedcli: Unified skill for the entire bytedcli command surface. Use when tasks involve ByteDance internal R&D platforms and the agent should prefer bytedcli through CLI, MCP, or bundled references instead of opening web pages or hand-writing internal API calls. Covers auth and tokens; Feishu/Lark and Cloud Docs/Ticket/Kani approval; Codebase, BAM, BITS, Devflow, BitsAI, SCM, AGW, Luban, Lynx, Overpass, Goofy, Fornax, Meego, AIME, Tika, Starling; Live IM Trace; TCE/TCC/ENV/TOS/FaaS/Volcano/ByteCloud/Bytetree/Netlink/Neptune/Settings/Kross; RDS, ByteDoc, Merlin, Hive, Dorado, Aeolus, DataQ, TQS, ES, Cache, BMQ; Cronjob, Log, APM, Slardar Web/App/OS, Codecov, Archer; DKMS, KMS v2, IAM; internal knowledge insearch across Feishu/ByteCloud/BitsAI/ByteTech/intranet; MCP server startup and global update flows. (file: /data00/home/liangweifeng/.agents/skills/bytedcli/SKILL.md)
@@ -221,7 +221,7 @@ A plugin is a local bundle of skills, MCP servers, and apps. Below is the list o
 # User Message
 
 <environment_context>
-  <cwd>/data00/home/liangweifeng/phistory/captures/codex/0.132.0</cwd>
+  <cwd>/data00/home/liangweifeng/phistory/captures/codex/0.133.0</cwd>
   <shell>bash</shell>
   <current_date>2026-05-22</current_date>
   <timezone>Asia/Shanghai</timezone>
@@ -248,21 +248,26 @@ Use the `apply_patch` tool to edit files. This is a FREEFORM tool, so do not wra
 }
 ```
 
-## close_agent
+## create_goal
 
-Close an agent and any open descendants when they are no longer needed, and return the target agent's previous status before shutdown was requested. Don't keep agents open for too long if they are not needed anymore.
+Create a goal only when explicitly requested by the user or system/developer instructions; do not infer goals from ordinary tasks.
+Set token_budget only when an explicit token budget is requested. Fails if a goal exists; use update_goal only for status.
 
 ```json
 {
   "type": "object",
   "properties": {
-    "target": {
+    "objective": {
       "type": "string",
-      "description": "Agent id to close (from spawn_agent)."
+      "description": "Required. The concrete objective to start pursuing. This starts a new active goal only when no goal is currently defined; if a goal already exists, this tool fails."
+    },
+    "token_budget": {
+      "type": "integer",
+      "description": "Optional positive token budget for the new active goal."
     }
   },
   "required": [
-    "target"
+    "objective"
   ],
   "additionalProperties": false
 }
@@ -327,12 +332,45 @@ Runs a command in a PTY, returning output or a session ID for ongoing interactio
 }
 ```
 
+## get_goal
+
+Get the current goal for this thread, including status, budgets, token and elapsed-time usage, and remaining token budget.
+
+```json
+{
+  "type": "object",
+  "properties": {},
+  "required": [],
+  "additionalProperties": false
+}
+```
+
 ## image_generation
 
 ```json
 {
   "type": "image_generation",
   "output_format": "png"
+}
+```
+
+## list_available_plugins_to_install
+
+# List plugin/connector install candidates
+
+Use this tool only when both are true:
+- The user explicitly asks to use a specific plugin or connector that is not already available in the current context or active `tools` list.
+- `tool_search` is not available, or it has already been called and did not find or make the requested tool callable.
+
+Returns known plugins and connectors that can be passed to `request_plugin_install`. When both a plugin and a connector match, prefer the plugin; use the connector only when its corresponding plugin is already installed.
+
+
+```json
+{
+  "type": "object",
+  "properties": {},
+  "required": [],
+  "additionalProperties": false
 }
 ```
 
@@ -407,43 +445,9 @@ Read a specific resource from an MCP server given the server name and resource U
 
 # Request plugin/connector install
 
-Use this tool only to ask the user to install one known plugin or connector from the list below. The list contains known candidates that are not currently installed.
+Use this tool only after `list_available_plugins_to_install` returns a plugin or connector that exactly matches the user's explicit request.
 
-Use this ONLY when all of the following are true:
-- The user explicitly asks to use a specific plugin or connector that is not already available in the current context or active `tools` list.
-- `tool_search` is not available, or it has already been called and did not find or make the requested tool callable.
-- The plugin or connector is one of the known installable plugins or connectors listed below. Only ask to install plugins or connectors from this list.
-
-Do not use this tool for adjacent capabilities, broad recommendations, or tools that merely seem useful. Only use when the user explicitly asks to use that exact listed plugin or connector.
-
-Known plugins/connectors available to install:
-- canva (id: `canva@openai-curated`, type: plugin, action: install): Search, create, edit designs
-- figma (id: `figma@openai-curated`, type: plugin, action: install): Figma workflows for design implementation, Code Connect templates, and design system rule generation.
-- gmail (id: `gmail@openai-curated`, type: plugin, action: install): Work with Gmail using the configured Gmail app connector.
-- google-calendar (id: `google-calendar@openai-curated`, type: plugin, action: install): Connect Google Calendar for scheduling, availability, daily briefs, and event management.
-- google-drive (id: `google-drive@openai-curated`, type: plugin, action: install): Use Google Drive as the single entrypoint for Drive, Docs, Sheets, and Slides work.
-- linear (id: `linear@openai-curated`, type: plugin, action: install): Find and reference issues and projects.
-- notion (id: `notion@openai-curated`, type: plugin, action: install): Notion workflows for implementation planning, research synthesis, meeting preparation, and knowledge capture.
-- openai-developers (id: `openai-developers@openai-curated`, type: plugin, action: install): Build with OpenAI APIs, Agents SDK, and ChatGPT Apps, and create and save OpenAI API keys from Codex.
-- outlook-calendar (id: `outlook-calendar@openai-curated`, type: plugin, action: install): Connect Outlook Calendar for scheduling, daily briefs, event prep, and safe meeting changes.
-- outlook-email (id: `outlook-email@openai-curated`, type: plugin, action: install): Work with Outlook Email using the configured Microsoft Outlook app connector.
-- sharepoint (id: `sharepoint@openai-curated`, type: plugin, action: install): Work with SharePoint using the configured Microsoft SharePoint app connector.
-- slack (id: `slack@openai-curated`, type: plugin, action: install): Work with Slack using the configured Slack integration.
-- teams (id: `teams@openai-curated`, type: plugin, action: install): Work with Teams using the configured Microsoft Teams app connector.
-
-Workflow:
-
-1. Check the current context and active `tools` list first. If current active tools aren't relevant and `tool_search` is available, only call this tool after `tool_search` has already been tried and found no relevant tool.
-2. Match the user's explicit request against the known plugin/connector list above. Only proceed when one listed plugin or connector exactly fits.
-3. If we found both connectors and plugins to install, use plugins first, only use connectors if the corresponding plugin is installed but the connector is not.
-4. If one plugin or connector clearly fits, call `request_plugin_install` with:
-   - `tool_type`: `connector` or `plugin`
-   - `action_type`: `install`
-   - `tool_id`: exact id from the known plugin/connector list above
-   - `suggest_reason`: concise one-line user-facing reason this plugin or connector can help with the current request
-5. After the request flow completes:
-   - if the user finished the install flow, continue by searching again or using the newly available plugin or connector
-   - if the user did not finish, continue without that plugin or connector, and don't request it again unless the user explicitly asks for it.
+Do not use it for adjacent capabilities, broad recommendations, or tools that merely seem useful. Pass the returned `tool_type` through directly, and pass the returned `id` as `tool_id`.
 
 IMPORTANT: DO NOT call this tool in parallel with other tools.
 
@@ -544,193 +548,6 @@ Request user input for one to three short questions and wait for the response. T
 }
 ```
 
-## resume_agent
-
-Resume a previously closed agent by id so it can receive send_input and wait_agent calls.
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "id": {
-      "type": "string",
-      "description": "Agent id to resume."
-    }
-  },
-  "required": [
-    "id"
-  ],
-  "additionalProperties": false
-}
-```
-
-## send_input
-
-Send a message to an existing agent. Use interrupt=true to redirect work immediately. You should reuse the agent by send_input if you believe your assigned task is highly dependent on the context of a previous task.
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "interrupt": {
-      "type": "boolean",
-      "description": "When true, stop the agent's current task and handle this immediately. When false (default), queue this message."
-    },
-    "items": {
-      "type": "array",
-      "description": "Structured input items. Use this to pass explicit mentions (for example app:// connector paths).",
-      "items": {
-        "type": "object",
-        "properties": {
-          "image_url": {
-            "type": "string",
-            "description": "Image URL when type is image."
-          },
-          "name": {
-            "type": "string",
-            "description": "Display name when type is skill or mention."
-          },
-          "path": {
-            "type": "string",
-            "description": "Path when type is local_image/skill, or structured mention target such as app://<connector-id> or plugin://<plugin-name>@<marketplace-name> when type is mention."
-          },
-          "text": {
-            "type": "string",
-            "description": "Text content when type is text."
-          },
-          "type": {
-            "type": "string",
-            "description": "Input item type: text, image, local_image, skill, or mention."
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    "message": {
-      "type": "string",
-      "description": "Legacy plain-text message to send to the agent. Use either message or items."
-    },
-    "target": {
-      "type": "string",
-      "description": "Agent id to message (from spawn_agent)."
-    }
-  },
-  "required": [
-    "target"
-  ],
-  "additionalProperties": false
-}
-```
-
-## spawn_agent
-
-
-        
-        Available model overrides (optional; inherited parent model is preferred):
-- `gpt-5.5`: Frontier model for complex coding, research, and real-world work. Reasoning efforts: low, medium (default), high, xhigh. Service tiers: priority.
-- `gpt-5.4`: Strong model for everyday coding. Reasoning efforts: low, medium (default), high, xhigh. Service tiers: priority.
-- `gpt-5.4-mini`: Small, fast, and cost-efficient model for simpler coding tasks. Reasoning efforts: low, medium (default), high, xhigh.
-- `gpt-5.3-codex`: Coding-optimized model. Reasoning efforts: low, medium (default), high, xhigh.
-- `gpt-5.2`: Optimized for professional work and long-running agents. Reasoning efforts: low, medium (default), high, xhigh.
-        Spawn a sub-agent for a well-scoped task. Returns the spawned agent id plus the user-facing nickname when available. Spawned agents inherit your current model by default. Omit `model` to use that preferred default; set `model` only when an explicit override is needed.
-This spawn_agent tool provides you access to sub-agents that inherit your current model by default. Do not set the `model` field unless the user explicitly asks for a different model or there is a clear task-specific reason. You should follow the rules and guidelines below to use this tool.
-
-Only use `spawn_agent` if and only if the user explicitly asks for sub-agents, delegation, or parallel agent work.
-Requests for depth, thoroughness, research, investigation, or detailed codebase analysis do not count as permission to spawn.
-Agent-role guidance below only helps choose which agent to use after spawning is already authorized; it never authorizes spawning by itself.
-
-### When to delegate vs. do the subtask yourself
-- First, quickly analyze the overall user task and form a succinct high-level plan. Identify which tasks are immediate blockers on the critical path, and which tasks are sidecar tasks that are needed but can run in parallel without blocking the next local step. As part of that plan, explicitly decide what immediate task you should do locally right now. Do this planning step before delegating to agents so you do not hand off the immediate blocking task to a submodel and then waste time waiting on it.
-- Use a subagent when a subtask is easy enough for it to handle and can run in parallel with your local work. Prefer delegating concrete, bounded sidecar tasks that materially advance the main task without blocking your immediate next local step.
-- Do not delegate urgent blocking work when your immediate next step depends on that result. If the very next action is blocked on that task, the main rollout should usually do it locally to keep the critical path moving.
-- Keep work local when the subtask is too difficult to delegate well and when it is tightly coupled, urgent, or likely to block your immediate next step.
-
-### Designing delegated subtasks
-- Subtasks must be concrete, well-defined, and self-contained.
-- Delegated subtasks must materially advance the main task.
-- Do not duplicate work between the main rollout and delegated subtasks.
-- Avoid issuing multiple delegate calls on the same unresolved thread unless the new delegated task is genuinely different and necessary.
-- Narrow the delegated ask to the concrete output you need next.
-- For coding tasks, prefer delegating concrete code-change worker subtasks over read-only explorer analysis when the subagent can make a bounded patch in a clear write scope.
-- When delegating coding work, instruct the submodel to edit files directly in its forked workspace and list the file paths it changed in the final answer.
-- For code-edit subtasks, decompose work so each delegated task has a disjoint write set.
-
-### After you delegate
-- Call wait_agent very sparingly. Only call wait_agent when you need the result immediately for the next critical-path step and you are blocked until it returns.
-- Do not redo delegated subagent tasks yourself; focus on integrating results or tackling non-overlapping work.
-- While the subagent is running in the background, do meaningful non-overlapping work immediately.
-- Do not repeatedly wait by reflex.
-- When a delegated coding task returns, quickly review the uploaded changes, then integrate or refine them.
-
-### Parallel delegation patterns
-- Run multiple independent information-seeking subtasks in parallel when you have distinct questions that can be answered independently.
-- Split implementation into disjoint codebase slices and spawn multiple agents for them in parallel when the write scopes do not overlap.
-- Delegate verification only when it can run in parallel with ongoing implementation and is likely to catch a concrete risk before final integration.
-- The key is to find opportunities to spawn multiple independent subtasks in parallel within the same round, while ensuring each subtask is well-defined, self-contained, and materially advances the main task.
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "agent_type": {
-      "type": "string",
-      "description": "Optional type name for the new agent. If omitted, `default` is used.\nAvailable roles:\ndefault: {\nDefault agent.\n}\nexplorer: {\nUse `explorer` for specific codebase questions.\nExplorers are fast and authoritative.\nThey must be used to ask specific, well-scoped questions on the codebase.\nRules:\n- In order to avoid redundant work, you should avoid exploring the same problem that explorers have already covered. Typically, you should trust the explorer results without additional verification. You are still allowed to inspect the code yourself to gain the needed context!\n- You are encouraged to spawn up multiple explorers in parallel when you have multiple distinct questions to ask about the codebase that can be answered independently. This allows you to get more information faster without waiting for one question to finish before asking the next. While waiting for the explorer results, you can continue working on other local tasks that do not depend on those results. This parallelism is a key advantage of delegation, so use it whenever you have multiple questions to ask.\n- Reuse existing explorers for related questions.\n}\nworker: {\nUse for execution and production work.\nTypical tasks:\n- Implement part of a feature\n- Fix tests or bugs\n- Split large refactors into independent chunks\nRules:\n- Explicitly assign **ownership** of the task (files / responsibility). When the subtask involves code changes, you should clearly specify which files or modules the worker is responsible for. This helps avoid merge conflicts and ensures accountability. For example, you can say \"Worker 1 is responsible for updating the authentication module, while Worker 2 will handle the database layer.\" By defining clear ownership, you can delegate more effectively and reduce coordination overhead.\n- Always tell workers they are **not alone in the codebase**, and they should not revert the edits made by others, and they should adjust their implementation to accommodate the changes made by others. This is important because there may be multiple workers making changes in parallel, and they need to be aware of each other's work to avoid conflicts and ensure a cohesive final product.\n}"
-    },
-    "fork_context": {
-      "type": "boolean",
-      "description": "When true, fork the current thread history into the new agent before sending the initial prompt. This must be used when you want the new agent to have exactly the same context as you."
-    },
-    "items": {
-      "type": "array",
-      "description": "Structured input items. Use this to pass explicit mentions (for example app:// connector paths).",
-      "items": {
-        "type": "object",
-        "properties": {
-          "image_url": {
-            "type": "string",
-            "description": "Image URL when type is image."
-          },
-          "name": {
-            "type": "string",
-            "description": "Display name when type is skill or mention."
-          },
-          "path": {
-            "type": "string",
-            "description": "Path when type is local_image/skill, or structured mention target such as app://<connector-id> or plugin://<plugin-name>@<marketplace-name> when type is mention."
-          },
-          "text": {
-            "type": "string",
-            "description": "Text content when type is text."
-          },
-          "type": {
-            "type": "string",
-            "description": "Input item type: text, image, local_image, skill, or mention."
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    "message": {
-      "type": "string",
-      "description": "Initial plain-text task for the new agent. Use either message or items."
-    },
-    "model": {
-      "type": "string",
-      "description": "Optional model override for the new agent. Leave unset to inherit the same model as the parent, which is the preferred default. Only set this when the user explicitly asks for a different model or the task clearly requires one."
-    },
-    "reasoning_effort": {
-      "type": "string",
-      "description": "Optional reasoning effort override for the new agent. Replaces the inherited reasoning effort."
-    },
-    "service_tier": {
-      "type": "string",
-      "description": "Optional service tier override for the new agent. Leave unset unless the user explicitly asks for one."
-    }
-  },
-  "additionalProperties": false
-}
-```
-
 ## tool_search
 
 # Tool discovery
@@ -741,6 +558,7 @@ You have access to tools from the following sources:
 - Adobe Acrobat: Enables viewing, extracting, converting, and organizing documents, with a focus on PDF workflows such as OCR, markdown extraction, export to Office formats, and conversion from other file types or chat text into PDFs. Use to compress, split, merge, reorder, rotate, redact, delete pages, or interactively edit/annotate PDFs, including when users need an upload or page-organization UI.
 - Adobe Photoshop: Enables interactive editing of user images, including region selection, tonal and color adjustments, background removal or blur, and preset artistic effects, all applied globally or to precise masks. Also supports a single-pass generative edit for object/background changes, undoing non-generative edits, and surfacing a status widget when generative edit credits are exhausted.
 - GitHub: Access repositories, issues, and pull requests. Required for some features such as Codex
+- Multi-agent tools: Spawn and manage sub-agents.
 Some of the tools may not have been provided to you upfront, and you should use this tool (`tool_search`) to search for the required tools. For MCP tool discovery, always use `tool_search` instead of `list_mcp_resources` or `list_mcp_resource_templates`.
 
 ```json
@@ -758,6 +576,39 @@ Some of the tools may not have been provided to you upfront, and you should use 
   },
   "required": [
     "query"
+  ],
+  "additionalProperties": false
+}
+```
+
+## update_goal
+
+Update the existing goal.
+Use this tool only to mark the goal achieved or genuinely blocked.
+Set status to `complete` only when the objective has actually been achieved and no required work remains.
+Set status to `blocked` only when the same blocking condition has repeated for at least three consecutive goal turns, counting the original/user-triggered turn and any automatic continuations, and the agent cannot make meaningful progress without user input or an external-state change.
+If the user resumes a goal that was previously marked `blocked`, treat the resumed run as a fresh blocked audit. If the same blocking condition then repeats for at least three consecutive resumed goal turns, set status to `blocked` again.
+Once the blocked threshold is satisfied, do not keep reporting that you are still blocked while leaving the goal active; set status to `blocked`.
+Do not use `blocked` merely because the work is hard, slow, uncertain, incomplete, or would benefit from clarification.
+Do not mark a goal complete merely because its budget is nearly exhausted or because you are stopping work.
+You cannot use this tool to pause, resume, budget-limit, or usage-limit a goal; those status changes are controlled by the user or system.
+When marking a budgeted goal achieved with status `complete`, report the final token usage from the tool result to the user.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "string",
+      "description": "Required. Set to `complete` only when the objective is achieved and no required work remains. Set to `blocked` only after the same blocking condition has recurred for at least three consecutive goal turns and the agent is at an impasse. After a previously blocked goal is resumed, the resumed run starts a fresh blocked audit.",
+      "enum": [
+        "complete",
+        "blocked"
+      ]
+    }
+  },
+  "required": [
+    "status"
   ],
   "additionalProperties": false
 }
@@ -829,33 +680,6 @@ View a local image from the filesystem (only use if given a full filepath by the
   },
   "required": [
     "path"
-  ],
-  "additionalProperties": false
-}
-```
-
-## wait_agent
-
-Wait for agents to reach a final status. Completed statuses may include the agent's final message. Returns empty status when timed out. Once the agent reaches a final status, a notification message will be received containing the same completed status.
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "targets": {
-      "type": "array",
-      "description": "Agent ids to wait on. Pass multiple ids to wait for whichever finishes first.",
-      "items": {
-        "type": "string"
-      }
-    },
-    "timeout_ms": {
-      "type": "number",
-      "description": "Optional timeout in milliseconds. Defaults to 30000, min 10000, max 3600000. Prefer longer waits (minutes) to avoid busy polling."
-    }
-  },
-  "required": [
-    "targets"
   ],
   "additionalProperties": false
 }

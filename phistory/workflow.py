@@ -37,9 +37,10 @@ def backfill(
     force: bool = False,
     keep_tap: bool = False,
     limit: int | None = None,
+    include_prerelease: bool = False,
 ) -> list[CaptureResult]:
     agent = get_agent(agent_id)
-    versions: list[VersionInfo] = npm.versions_between(agent, start, end)
+    versions: list[VersionInfo] = npm.versions_between(agent, start, end, include_prerelease=include_prerelease)
     if limit is not None:
         versions = versions[:limit]
     return [
