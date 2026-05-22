@@ -2,9 +2,9 @@
 
 `phistory` archives versioned system prompt snapshots from agent CLIs.
 
-It installs a specific CLI release, runs it once through [`claude-tap`](https://github.com/WEIFENG2333/claude-tap), captures the prompt-bearing HTTP request, and writes a comparison-friendly Markdown snapshot. The upstream target is a local dummy server, so the captured run does not send a model request to the real provider.
+It installs a specific CLI release, runs it once through [`claude-tap`](https://github.com/WEIFENG2333/claude-tap), captures the prompt-bearing HTTP request, and writes a comparison-friendly Markdown snapshot.
 
-GitHub Actions runs this on a schedule and updates the repository when a new supported CLI version appears.
+GitHub Actions checks for new supported CLI versions every hour and updates the repository when one appears.
 
 ## Usage
 
