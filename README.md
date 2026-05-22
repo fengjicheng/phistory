@@ -1,6 +1,6 @@
-# phistory
+# Phistory
 
-`phistory` archives versioned system prompt snapshots from agent CLIs.
+Phistory archives versioned system prompt snapshots from agent CLIs.
 
 It installs a specific CLI release, runs it once through [`claude-tap`](https://github.com/WEIFENG2333/claude-tap), captures the prompt-bearing HTTP request, and writes a comparison-friendly Markdown snapshot.
 
@@ -12,7 +12,12 @@ GitHub Actions checks for new supported CLI versions every hour and updates the 
 uv run phistory capture --latest --agents claude-code,codex
 uv run phistory backfill claude-code --from 2.1.113 --to latest
 uv run phistory render-index
+uv run phistory render-site
 ```
+
+## Web UI
+
+`index.html` is a static prompt viewer with version navigation and Monaco-powered prompt diffs. GitHub Pages deploys it from the repository contents.
 
 ## Supported Agents
 

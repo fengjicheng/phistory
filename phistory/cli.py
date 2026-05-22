@@ -7,6 +7,7 @@ from pathlib import Path
 from phistory import __version__
 from phistory.registry import AGENTS, parse_agent_ids
 from phistory.render import render_index
+from phistory.site import render_site
 from phistory.workflow import capture_latest, iter_backfill
 
 
@@ -37,6 +38,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     index = sub.add_parser("render-index", help="render capture index")
     index.add_argument("-o", "--output", default="README.md", help="index markdown path")
+
+    site = sub.add_parser("render-site", help="render static HTML site")
+    site.add_argument("-o", "--output", default="index.html", help="site HTML path")
 
     return parser
 
@@ -76,6 +80,11 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "render-index":
         render_index(root, Path(args.output))
+        print(f"wrote {args.output}")
+        return 0
+
+    if args.command == "render-site":
+        render_site(root, Path(args.output))
         print(f"wrote {args.output}")
         return 0
 

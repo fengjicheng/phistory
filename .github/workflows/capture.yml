@@ -33,6 +33,7 @@ jobs:
           retention-days: 7
       - run: uv run phistory capture --latest --agents claude-code,codex
       - run: uv run phistory render-index
+      - run: uv run phistory render-site
       - name: Commit capture updates
         run: |
           if git diff --quiet; then
@@ -41,6 +42,6 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add README.md captures
+          git add README.md index.html captures
           git commit -m "Capture latest prompt snapshots"
           git push
