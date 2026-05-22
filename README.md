@@ -34,7 +34,7 @@ Each capture is stored under `captures/<agent>/<version>/`:
 
 ## Latest Captures
 
-- Claude Code: `2.1.147` published 2026-05-21 17:16 UTC, captured 2026-05-21 23:52 UTC
+- Claude Code: `2.1.148` published 2026-05-22 00:10 UTC, captured 2026-05-22 05:06 UTC
 - Codex CLI: `0.133.0` published 2026-05-21 17:13 UTC, captured 2026-05-21 23:53 UTC
 
 ## Captures
@@ -71,6 +71,7 @@ Each capture is stored under `captures/<agent>/<version>/`:
 | Codex CLI | `0.102.0` | 2026-02-17 20:03 UTC | 2026-05-21 23:38 UTC | [codex 0.102.0, published 2026-02-17 20:03 UTC](captures/codex/0.102.0/prompt.md) | [trace.jsonl](captures/codex/0.102.0/trace.jsonl) |
 | Codex CLI | `0.101.0` | 2026-02-12 20:06 UTC | 2026-05-21 23:38 UTC | [codex 0.101.0, published 2026-02-12 20:06 UTC](captures/codex/0.101.0/prompt.md) | [trace.jsonl](captures/codex/0.101.0/trace.jsonl) |
 | Codex CLI | `0.100.0` | 2026-02-12 18:30 UTC | 2026-05-21 23:38 UTC | [codex 0.100.0, published 2026-02-12 18:30 UTC](captures/codex/0.100.0/prompt.md) | [trace.jsonl](captures/codex/0.100.0/trace.jsonl) |
+| Claude Code | `2.1.148` | 2026-05-22 00:10 UTC | 2026-05-22 05:06 UTC | [claude-code 2.1.148, published 2026-05-22 00:10 UTC](captures/claude-code/2.1.148/prompt.md) | [trace.jsonl](captures/claude-code/2.1.148/trace.jsonl) |
 | Claude Code | `2.1.147` | 2026-05-21 17:16 UTC | 2026-05-21 23:52 UTC | [claude-code 2.1.147, published 2026-05-21 17:16 UTC](captures/claude-code/2.1.147/prompt.md) | [trace.jsonl](captures/claude-code/2.1.147/trace.jsonl) |
 | Claude Code | `2.1.146` | 2026-05-20 20:14 UTC | 2026-05-21 23:45 UTC | [claude-code 2.1.146, published 2026-05-20 20:14 UTC](captures/claude-code/2.1.146/prompt.md) | [trace.jsonl](captures/claude-code/2.1.146/trace.jsonl) |
 | Claude Code | `2.1.145` | 2026-05-19 17:40 UTC | 2026-05-21 23:45 UTC | [claude-code 2.1.145, published 2026-05-19 17:40 UTC](captures/claude-code/2.1.145/prompt.md) | [trace.jsonl](captures/claude-code/2.1.145/trace.jsonl) |
