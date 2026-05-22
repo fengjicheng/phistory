@@ -1,6 +1,6 @@
 # Phistory
 
-Phistory automatically archives versioned system prompt snapshots from agent CLIs like Claude Code and Codex.
+Phistory automatically archives versioned system prompt snapshots from agent CLIs like Claude Code, Codex, OpenClaw, and Hermes.
 
 It installs a specific CLI release, runs it once through [`claude-tap`](https://github.com/WEIFENG2333/claude-tap), captures the prompt-bearing HTTP request, and writes a comparison-friendly Markdown snapshot.
 
@@ -13,7 +13,7 @@ GitHub Actions checks for new supported CLI versions every hour and updates the 
 ## Usage
 
 ```bash
-uv run phistory capture --latest --agents claude-code,codex
+uv run phistory capture --latest --agents claude-code,codex,openclaw,hermes
 uv run phistory backfill claude-code --from 2.1.113 --to latest
 uv run phistory render-index
 uv run phistory render-site
@@ -29,6 +29,8 @@ The viewer is optimized for comparing prompt changes across releases. Top contro
 
 - Claude Code (`@anthropic-ai/claude-code`)
 - Codex CLI (`@openai/codex`)
+- OpenClaw (`openclaw`)
+- Hermes Agent (`hermes-agent`)
 
 ## Capture Format
 
@@ -49,11 +51,15 @@ Each capture is stored under `captures/<agent>/<version>/`:
 
 - Claude Code: `2.1.148` published 2026-05-22 00:10 UTC, captured 2026-05-22 05:06 UTC
 - Codex CLI: `0.133.0` published 2026-05-21 17:13 UTC, captured 2026-05-21 23:53 UTC
+- Hermes Agent: `v2026.5.16` published 2026-05-16 09:59 UTC, captured 2026-05-22 11:56 UTC
+- OpenClaw: `2026.5.20` published 2026-05-21 20:41 UTC, captured 2026-05-22 11:56 UTC
 
 ## Captures
 
 | Agent | Version | Published | Captured | Snapshot | Raw Trace |
 | --- | --- | --- | --- | --- | --- |
+| OpenClaw | `2026.5.20` | 2026-05-21 20:41 UTC | 2026-05-22 11:56 UTC | [openclaw 2026.5.20, published 2026-05-21 20:41 UTC](captures/openclaw/2026.5.20/prompt.md) | [trace.jsonl](captures/openclaw/2026.5.20/trace.jsonl) |
+| Hermes Agent | `v2026.5.16` | 2026-05-16 09:59 UTC | 2026-05-22 11:56 UTC | [hermes v2026.5.16, published 2026-05-16 09:59 UTC](captures/hermes/v2026.5.16/prompt.md) | [trace.jsonl](captures/hermes/v2026.5.16/trace.jsonl) |
 | Codex CLI | `0.133.0` | 2026-05-21 17:13 UTC | 2026-05-21 23:53 UTC | [codex 0.133.0, published 2026-05-21 17:13 UTC](captures/codex/0.133.0/prompt.md) | [trace.jsonl](captures/codex/0.133.0/trace.jsonl) |
 | Codex CLI | `0.132.0` | 2026-05-20 02:39 UTC | 2026-05-21 23:45 UTC | [codex 0.132.0, published 2026-05-20 02:39 UTC](captures/codex/0.132.0/prompt.md) | [trace.jsonl](captures/codex/0.132.0/trace.jsonl) |
 | Codex CLI | `0.131.0` | 2026-05-18 18:08 UTC | 2026-05-21 23:45 UTC | [codex 0.131.0, published 2026-05-18 18:08 UTC](captures/codex/0.131.0/prompt.md) | [trace.jsonl](captures/codex/0.131.0/trace.jsonl) |
