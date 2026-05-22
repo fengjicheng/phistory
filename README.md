@@ -1,10 +1,14 @@
 # Phistory
 
-Phistory archives versioned system prompt snapshots from agent CLIs.
+Phistory automatically archives versioned system prompt snapshots from agent CLIs like Claude Code and Codex.
 
 It installs a specific CLI release, runs it once through [`claude-tap`](https://github.com/WEIFENG2333/claude-tap), captures the prompt-bearing HTTP request, and writes a comparison-friendly Markdown snapshot.
 
 GitHub Actions checks for new supported CLI versions every hour and updates the repository when one appears.
+
+[Open the prompt diff viewer](http://bkfeng.top/phistory/)
+
+![Phistory prompt diff viewer](docs/screenshot.png)
 
 ## Usage
 
@@ -19,6 +23,8 @@ uv run phistory render-site
 
 `index.html` is a static prompt viewer with version navigation and Monaco-powered prompt diffs. GitHub Pages deploys it from the repository contents.
 
+The viewer is optimized for comparing prompt changes across releases. Top controls choose the agent and the two versions; the `Raw` link opens the selected prompt Markdown directly.
+
 ## Supported Agents
 
 - Claude Code (`@anthropic-ai/claude-code`)
@@ -31,6 +37,13 @@ Each capture is stored under `captures/<agent>/<version>/`:
 - `prompt.md`: normalized prompt snapshot for reading and diffing
 - `trace.jsonl`: raw captured HTTP trace, kept unnormalized as evidence
 - `meta.json`: package, version, command, and capture metadata
+
+## For AI Agents
+
+- Use `README.md` for the latest capture index and supported-agent overview.
+- Use `captures/<agent>/<version>/prompt.md` when you need a normalized prompt snapshot.
+- Use `captures/<agent>/<version>/trace.jsonl` only when you need raw HTTP capture evidence.
+- Treat `index.html` as a human-facing viewer; the canonical machine-readable artifacts are under `captures/`.
 
 ## Latest Captures
 

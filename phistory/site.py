@@ -94,9 +94,21 @@ _HTML = r"""<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Diff versioned system prompt snapshots from agent CLIs.">
+<meta name="description" content="Phistory automatically archives versioned system prompt snapshots from agent CLIs like Claude Code and Codex.">
+<meta name="keywords" content="Phistory, system prompt history, Claude Code prompt, Codex CLI prompt, agent CLI, prompt diff, prompt archive">
+<meta name="application-name" content="Phistory">
+<meta property="og:title" content="Phistory">
+<meta property="og:description" content="Automatically archived system prompt snapshots and diffs for agent CLIs like Claude Code and Codex.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="http://bkfeng.top/phistory/">
+<meta property="og:image" content="http://bkfeng.top/phistory/docs/screenshot.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Phistory">
+<meta name="twitter:description" content="Automatically archived system prompt snapshots and diffs for agent CLIs like Claude Code and Codex.">
+<meta name="twitter:image" content="http://bkfeng.top/phistory/docs/screenshot.png">
+<link rel="canonical" href="http://bkfeng.top/phistory/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230f1115'/%3E%3Cpath d='M8 10h16M8 16h10M8 22h14' stroke='%237cc7ff' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
-<title>Phistory</title>
+<title>Phistory - Agent CLI System Prompt Diff History</title>
 <style>
 :root {
   color-scheme: dark;
