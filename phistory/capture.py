@@ -9,7 +9,7 @@ import time
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from phistory import npm
+from phistory import packages
 from phistory.models import CaptureResult, CaptureTarget
 from phistory.storage import copy_trace, is_captured, latest_trace, prepare_version_dir, remove_if_exists, write_meta
 from phistory.subprocesses import run
@@ -49,7 +49,7 @@ def capture_target(
     tap_output_dir = (version_dir / ".tap").resolve()
 
     try:
-        bin_dir = npm.install_agent(target.agent, target.version.version, install_dir)
+        bin_dir = packages.install_agent(target.agent, target.version.version, install_dir)
         binary_version = _binary_version(target, bin_dir)
         with (
             TemporaryDirectory(prefix="phistory-home-") as home_dir,
@@ -69,6 +69,7 @@ def capture_target(
                 "--no-update-check",
                 "-o",
                 str(tap_output_dir),
+                *_tap_mode_args(target),
                 *target.agent.run_args,
             ]
             result = run(argv, cwd=Path(work_dir), env=env, timeout=180, check=False)
@@ -127,6 +128,10 @@ def _capture_env(target: CaptureTarget, bin_dir: Path, home_dir: Path | None = N
         path.mkdir(parents=True, exist_ok=True)
     if target.agent.fake_chatgpt_auth:
         _write_fake_chatgpt_auth(home)
+    if target.agent.home_profile == "openclaw":
+        _write_openclaw_config(home)
+    if target.agent.home_profile == "hermes":
+        _write_hermes_config(home)
     env = {
         **target.agent.fake_env,
         **target.agent.extra_env,
@@ -141,6 +146,15 @@ def _capture_env(target: CaptureTarget, bin_dir: Path, home_dir: Path | None = N
         "GITHUB_ACTIONS": "true",
         "TZ": "Etc/UTC",
     }
+    if target.agent.home_profile == "hermes":
+        env["HERMES_HOME"] = str(home / ".hermes")
+    if target.agent.home_profile == "openclaw":
+        env.update(
+            {
+                "OPENCLAW_STATE_DIR": str(home / ".openclaw"),
+                "OPENCLAW_CONFIG_PATH": str(home / ".openclaw" / "openclaw.json"),
+            }
+        )
     if target.agent.fake_chatgpt_auth:
         env.update({"OPENAI_API_KEY": "", "CODEX_API_KEY": "", "CODEX_ACCESS_TOKEN": ""})
     return env
@@ -158,6 +172,12 @@ def _needs_codex_api_key_retry(target: CaptureTarget, result) -> bool:
         return False
     output = f"{result.stderr}\n{result.stdout}"
     return "Missing OpenAI API key" in output
+
+
+def _tap_mode_args(target: CaptureTarget) -> list[str]:
+    if target.agent.tap_mode == "auto":
+        return []
+    return ["-m", target.agent.tap_mode]
 
 
 def _without_arg(argv: list[str], value: str) -> list[str]:
@@ -178,6 +198,52 @@ def _write_fake_chatgpt_auth(home: Path) -> None:
         "last_refresh": "2026-01-01T00:00:00Z",
     }
     (codex_home / "auth.json").write_text(json.dumps(auth, separators=(",", ":")), encoding="utf-8")
+
+
+def _write_openclaw_config(home: Path) -> None:
+    state_dir = home / ".openclaw"
+    state_dir.mkdir(parents=True, exist_ok=True)
+    config = {
+        "agents": {
+            "defaults": {
+                "workspace": str(state_dir / "workspace"),
+                "model": {"primary": "phistory/phistory-dummy"},
+            }
+        },
+        "models": {
+            "providers": {
+                "phistory": {
+                    "api": "openai-responses",
+                    "baseUrl": "http://127.0.0.1:9/v1",
+                    "apiKey": "phistory-fake-api-key",
+                    "models": [{"id": "phistory-dummy", "name": "Phistory Dummy"}],
+                }
+            }
+        },
+    }
+    (state_dir / "openclaw.json").write_text(json.dumps(config, indent=2), encoding="utf-8")
+
+
+def _write_hermes_config(home: Path) -> None:
+    hermes_home = home / ".hermes"
+    hermes_home.mkdir(parents=True, exist_ok=True)
+    (hermes_home / "config.yaml").write_text(
+        "\n".join(
+            [
+                "model:",
+                "  provider: custom",
+                "  default: phistory-dummy",
+                "  base_url: http://127.0.0.1:9/v1",
+                "agent:",
+                "  max_turns: 1",
+                "display:",
+                "  streaming: false",
+                "  persistent_output: false",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
 
 
 def _fake_chatgpt_jwt() -> str:

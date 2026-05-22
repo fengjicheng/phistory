@@ -13,7 +13,7 @@ def test_capture_target_runs_local_cli_through_tap(tmp_path: Path, monkeypatch):
     fake_codex.write_text(_FAKE_CODEX, encoding="utf-8")
     fake_codex.chmod(fake_codex.stat().st_mode | stat.S_IXUSR)
 
-    monkeypatch.setattr("phistory.npm.install_agent", lambda *_args, **_kwargs: bin_dir)
+    monkeypatch.setattr("phistory.packages.install_agent", lambda *_args, **_kwargs: bin_dir)
 
     agent = AgentSpec(
         id="fake-codex",
@@ -93,6 +93,36 @@ def test_capture_env_writes_fake_chatgpt_auth(tmp_path: Path):
     assert env["TZ"] == "Etc/UTC"
 
 
+def test_capture_env_writes_agent_profile_configs(tmp_path: Path):
+    openclaw = AgentSpec(
+        id="openclaw",
+        display_name="OpenClaw",
+        package="openclaw",
+        tap_client="openclaw",
+        fake_env={},
+        run_args=(),
+        home_profile="openclaw",
+    )
+    hermes = AgentSpec(
+        id="hermes",
+        display_name="Hermes",
+        package="hermes-agent",
+        tap_client="hermes",
+        fake_env={},
+        run_args=(),
+        home_profile="hermes",
+    )
+
+    openclaw_env = _capture_env(
+        CaptureTarget(openclaw, VersionInfo("1.0.0"), tmp_path), tmp_path / "bin", tmp_path / "oc"
+    )
+    hermes_env = _capture_env(CaptureTarget(hermes, VersionInfo("1.0.0"), tmp_path), tmp_path / "bin", tmp_path / "hm")
+
+    openclaw_config = json.loads(Path(openclaw_env["OPENCLAW_CONFIG_PATH"]).read_text(encoding="utf-8"))
+    assert openclaw_config["models"]["providers"]["phistory"]["api"] == "openai-responses"
+    assert (Path(hermes_env["HERMES_HOME"]) / "config.yaml").read_text(encoding="utf-8").startswith("model:")
+
+
 def test_capture_failure_removes_partial_version_dir(tmp_path: Path, monkeypatch):
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
@@ -100,7 +130,7 @@ def test_capture_failure_removes_partial_version_dir(tmp_path: Path, monkeypatch
     fake_codex.write_text("#!/bin/sh\nexit 2\n", encoding="utf-8")
     fake_codex.chmod(fake_codex.stat().st_mode | stat.S_IXUSR)
 
-    monkeypatch.setattr("phistory.npm.install_agent", lambda *_args, **_kwargs: bin_dir)
+    monkeypatch.setattr("phistory.packages.install_agent", lambda *_args, **_kwargs: bin_dir)
 
     agent = AgentSpec(
         id="broken-codex",
@@ -125,7 +155,7 @@ def test_capture_retries_old_claude_without_session_persistence(tmp_path: Path, 
     fake_claude.write_text(_FAKE_OLD_CLAUDE, encoding="utf-8")
     fake_claude.chmod(fake_claude.stat().st_mode | stat.S_IXUSR)
 
-    monkeypatch.setattr("phistory.npm.install_agent", lambda *_args, **_kwargs: bin_dir)
+    monkeypatch.setattr("phistory.packages.install_agent", lambda *_args, **_kwargs: bin_dir)
 
     agent = AgentSpec(
         id="claude-code",
@@ -151,7 +181,7 @@ def test_capture_retries_old_codex_with_api_key(tmp_path: Path, monkeypatch):
     fake_codex.write_text(_FAKE_OLD_CODEX, encoding="utf-8")
     fake_codex.chmod(fake_codex.stat().st_mode | stat.S_IXUSR)
 
-    monkeypatch.setattr("phistory.npm.install_agent", lambda *_args, **_kwargs: bin_dir)
+    monkeypatch.setattr("phistory.packages.install_agent", lambda *_args, **_kwargs: bin_dir)
 
     agent = AgentSpec(
         id="codex",

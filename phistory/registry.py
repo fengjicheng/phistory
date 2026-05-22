@@ -44,7 +44,66 @@ CODEX = AgentSpec(
     ),
 )
 
-AGENTS: dict[str, AgentSpec] = {agent.id: agent for agent in (CLAUDE_CODE, CODEX)}
+OPENCLAW = AgentSpec(
+    id="openclaw",
+    display_name="OpenClaw",
+    package="openclaw",
+    tap_client="openclaw",
+    fake_env={"OPENAI_API_KEY": "phistory-fake-api-key"},
+    extra_env={
+        "DISABLE_AUTOUPDATER": "1",
+        "DISABLE_UPDATES": "1",
+        "CI": "1",
+    },
+    node_runtime="node@24",
+    home_profile="openclaw",
+    run_args=(
+        "--no-yolo",
+        "--",
+        "agent",
+        "--local",
+        "--agent",
+        "main",
+        "--message",
+        "Reply with one short sentence.",
+        "--json",
+        "--timeout",
+        "20",
+    ),
+)
+
+HERMES = AgentSpec(
+    id="hermes",
+    display_name="Hermes Agent",
+    package="NousResearch/hermes-agent",
+    source="github-release",
+    tap_client="hermes",
+    fake_env={
+        "OPENAI_API_KEY": "phistory-fake-api-key",
+        "CUSTOM_API_KEY": "phistory-fake-api-key",
+    },
+    extra_env={
+        "DISABLE_AUTOUPDATER": "1",
+        "DISABLE_UPDATES": "1",
+        "HERMES_ACCEPT_HOOKS": "1",
+    },
+    home_profile="hermes",
+    tap_mode="reverse",
+    run_args=(
+        "--no-yolo",
+        "--",
+        "--yolo",
+        "--accept-hooks",
+        "-z",
+        "Reply with one short sentence.",
+        "--provider",
+        "custom",
+        "--model",
+        "phistory-dummy",
+    ),
+)
+
+AGENTS: dict[str, AgentSpec] = {agent.id: agent for agent in (CLAUDE_CODE, CODEX, HERMES, OPENCLAW)}
 
 
 def get_agent(agent_id: str) -> AgentSpec:

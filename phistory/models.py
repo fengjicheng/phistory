@@ -4,6 +4,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal
 
+PackageSource = Literal["npm", "pypi", "github-release"]
+HomeProfile = Literal["none", "openclaw", "hermes"]
+TapMode = Literal["auto", "reverse", "forward"]
+
 
 @dataclass(frozen=True)
 class AgentSpec:
@@ -13,7 +17,11 @@ class AgentSpec:
     tap_client: str
     fake_env: dict[str, str]
     run_args: tuple[str, ...]
+    source: PackageSource = "npm"
     install_command: tuple[str, ...] = ("npm", "install", "--no-audit", "--no-fund")
+    node_runtime: str | None = None
+    home_profile: HomeProfile = "none"
+    tap_mode: TapMode = "auto"
     extra_env: dict[str, str] = field(default_factory=dict)
     fake_chatgpt_auth: bool = False
 

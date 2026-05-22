@@ -20,19 +20,19 @@ def build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command", required=True)
 
     capture = sub.add_parser("capture", help="capture current versions")
-    capture.add_argument("--latest", action="store_true", help="capture latest npm version for each agent")
+    capture.add_argument("--latest", action="store_true", help="capture latest package version for each agent")
     capture.add_argument(
         "--agents", default=None, help=f"comma-separated agent ids (default: {','.join(sorted(AGENTS))})"
     )
     capture.add_argument("--force", action="store_true", help="recapture existing versions")
     capture.add_argument("--keep-tap", action="store_true", help="keep raw claude-tap output directories")
 
-    fill = sub.add_parser("backfill", help="capture historical npm versions")
+    fill = sub.add_parser("backfill", help="capture historical package versions")
     fill.add_argument("agent", choices=sorted(AGENTS), help="agent id")
-    fill.add_argument("--from", dest="start", required=True, help="first npm version to capture")
-    fill.add_argument("--to", dest="end", default="latest", help="last npm version to capture")
+    fill.add_argument("--from", dest="start", required=True, help="first package version to capture")
+    fill.add_argument("--to", dest="end", default="latest", help="last package version to capture")
     fill.add_argument("--limit", type=int, default=None, help="capture at most N versions from the range")
-    fill.add_argument("--include-prerelease", action="store_true", help="include prerelease npm versions")
+    fill.add_argument("--include-prerelease", action="store_true", help="include prerelease package versions")
     fill.add_argument("--force", action="store_true", help="recapture existing versions")
     fill.add_argument("--keep-tap", action="store_true", help="keep raw claude-tap output directories")
 
