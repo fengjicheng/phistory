@@ -10,7 +10,6 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from phistory import npm
-from phistory.dummy_upstream import dummy_upstream
 from phistory.models import CaptureResult, CaptureTarget
 from phistory.storage import copy_trace, is_captured, latest_trace, prepare_version_dir, remove_if_exists, write_meta
 from phistory.subprocesses import run
@@ -55,7 +54,6 @@ def capture_target(
         with (
             TemporaryDirectory(prefix="phistory-home-") as home_dir,
             TemporaryDirectory(prefix="phistory-work-") as work_dir,
-            dummy_upstream() as upstream,
         ):
             env = _capture_env(target, bin_dir, Path(home_dir))
             argv = [
@@ -64,8 +62,6 @@ def capture_target(
                 "claude_tap",
                 "run",
                 target.agent.tap_client,
-                "-t",
-                upstream,
                 "--export-prompt",
                 str(prompt_path),
                 "--no-live",
@@ -95,7 +91,6 @@ def capture_target(
         replacements = {
             str(home_dir): "$PHISTORY_HOME",
             str(work_dir): "$PHISTORY_WORKSPACE",
-            upstream: "http://127.0.0.1:<dummy>",
         }
         _sanitize_file(prompt_path, replacements)
         write_meta(
@@ -110,7 +105,7 @@ def capture_target(
                 "binary_version": binary_version,
                 "captured_at": _iso_now(),
                 "tap_client": target.agent.tap_client,
-                "target": "local dummy upstream",
+                "target": "claude-tap capture-only",
                 "duration_seconds": round(time.time() - started, 3),
                 "command": [_replace_many(part, replacements) for part in _portable_command(argv, version_dir)],
             },

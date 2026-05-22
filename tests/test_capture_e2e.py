@@ -35,12 +35,13 @@ def test_capture_target_runs_local_cli_through_tap(tmp_path: Path, monkeypatch):
 
     meta = json.loads(target.meta_path.read_text(encoding="utf-8"))
     assert meta["binary_version"] == "fake-codex 1.0.0"
-    assert meta["target"] == "local dummy upstream"
+    assert meta["target"] == "claude-tap capture-only"
+    assert "-t" not in meta["command"]
 
     trace_records = [json.loads(line) for line in target.trace_path.read_text(encoding="utf-8").splitlines()]
     assert trace_records
     assert {record["response"]["status"] for record in trace_records} == {200}
-    assert all(record["upstream_base_url"].startswith("http://127.0.0.1:") for record in trace_records)
+    assert all(record["response"]["body"]["id"].startswith("resp_claude_tap_capture") for record in trace_records)
 
     prompt = target.prompt_path.read_text(encoding="utf-8")
     assert "Fake system prompt" in prompt
