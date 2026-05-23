@@ -112,15 +112,53 @@ def test_capture_env_writes_agent_profile_configs(tmp_path: Path):
         run_args=(),
         home_profile="hermes",
     )
+    kimi = AgentSpec(
+        id="kimi",
+        display_name="Kimi",
+        package="kimi-cli",
+        tap_client="kimi",
+        fake_env={},
+        run_args=(),
+        home_profile="kimi",
+    )
+    opencode = AgentSpec(
+        id="opencode",
+        display_name="opencode",
+        package="opencode-ai",
+        tap_client="opencode",
+        fake_env={},
+        run_args=(),
+        home_profile="opencode",
+    )
+    pi = AgentSpec(
+        id="pi",
+        display_name="Pi",
+        package="pi",
+        tap_client="pi",
+        fake_env={},
+        run_args=(),
+        home_profile="pi",
+    )
 
     openclaw_env = _capture_env(
         CaptureTarget(openclaw, VersionInfo("1.0.0"), tmp_path), tmp_path / "bin", tmp_path / "oc"
     )
     hermes_env = _capture_env(CaptureTarget(hermes, VersionInfo("1.0.0"), tmp_path), tmp_path / "bin", tmp_path / "hm")
+    kimi_env = _capture_env(CaptureTarget(kimi, VersionInfo("1.0.0"), tmp_path), tmp_path / "bin", tmp_path / "km")
+    opencode_env = _capture_env(
+        CaptureTarget(opencode, VersionInfo("1.0.0"), tmp_path), tmp_path / "bin", tmp_path / "op"
+    )
+    pi_env = _capture_env(CaptureTarget(pi, VersionInfo("1.0.0"), tmp_path), tmp_path / "bin", tmp_path / "pi")
 
     openclaw_config = json.loads(Path(openclaw_env["OPENCLAW_CONFIG_PATH"]).read_text(encoding="utf-8"))
+    kimi_config = (Path(kimi_env["KIMI_SHARE_DIR"]) / "config.toml").read_text(encoding="utf-8")
+    opencode_config = json.loads(Path(opencode_env["OPENCODE_CONFIG"]).read_text(encoding="utf-8"))
+    pi_models = json.loads((Path(pi_env["PI_CODING_AGENT_DIR"]) / "models.json").read_text(encoding="utf-8"))
     assert openclaw_config["models"]["providers"]["phistory"]["api"] == "openai-responses"
     assert (Path(hermes_env["HERMES_HOME"]) / "config.yaml").read_text(encoding="utf-8").startswith("model:")
+    assert 'type = "openai_responses"' in kimi_config
+    assert opencode_config["model"] == "openai/gpt-4.1"
+    assert pi_models["providers"]["phistory"]["api"] == "openai-responses"
 
 
 def test_capture_failure_removes_partial_version_dir(tmp_path: Path, monkeypatch):

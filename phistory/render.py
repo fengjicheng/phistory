@@ -7,7 +7,7 @@ from pathlib import Path
 
 _VERSION_PART_RE = re.compile(r"\d+|[A-Za-z]+")
 
-PROJECT_DESCRIPTION = "Phistory automatically archives versioned system prompt snapshots from agent CLIs like Claude Code, Codex, OpenClaw, and Hermes."
+PROJECT_DESCRIPTION = "Phistory automatically archives versioned system prompt snapshots from agent CLIs like Claude Code, Codex, OpenClaw, Hermes, Kimi, opencode, and Pi."
 
 
 def render_index(root: Path, output: Path) -> None:
@@ -46,7 +46,7 @@ def render_index(root: Path, output: Path) -> None:
         "## Usage",
         "",
         "```bash",
-        "uv run phistory capture --latest --agents claude-code,codex,openclaw,hermes",
+        "uv run phistory capture --latest --agents claude-code,codex,openclaw,hermes,kimi,opencode,pi",
         "uv run phistory backfill claude-code --from 2.1.113 --to latest",
         "uv run phistory render-index",
         "uv run phistory render-site",
@@ -64,6 +64,9 @@ def render_index(root: Path, output: Path) -> None:
         "- Codex CLI (`@openai/codex`)",
         "- OpenClaw (`openclaw`)",
         "- Hermes Agent (`hermes-agent`)",
+        "- Kimi CLI (`MoonshotAI/kimi-cli`)",
+        "- opencode (`opencode-ai`)",
+        "- Pi (`@earendil-works/pi-coding-agent`)",
         "",
         "## Capture Format",
         "",

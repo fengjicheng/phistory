@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Literal
 
 PackageSource = Literal["npm", "pypi", "github-release"]
-HomeProfile = Literal["none", "openclaw", "hermes"]
+HomeProfile = Literal["none", "hermes", "kimi", "openclaw", "opencode", "pi"]
 TapMode = Literal["auto", "reverse", "forward"]
 
 

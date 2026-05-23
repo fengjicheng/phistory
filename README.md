@@ -1,6 +1,6 @@
 # Phistory
 
-Phistory automatically archives versioned system prompt snapshots from agent CLIs like Claude Code, Codex, OpenClaw, and Hermes.
+Phistory automatically archives versioned system prompt snapshots from agent CLIs like Claude Code, Codex, OpenClaw, Hermes, Kimi, opencode, and Pi.
 
 It installs a specific CLI release, runs it once through [`claude-tap`](https://github.com/WEIFENG2333/claude-tap), captures the prompt-bearing HTTP request, and writes a comparison-friendly Markdown snapshot.
 
@@ -13,7 +13,7 @@ GitHub Actions checks for new supported CLI versions every hour and updates the 
 ## Usage
 
 ```bash
-uv run phistory capture --latest --agents claude-code,codex,openclaw,hermes
+uv run phistory capture --latest --agents claude-code,codex,openclaw,hermes,kimi,opencode,pi
 uv run phistory backfill claude-code --from 2.1.113 --to latest
 uv run phistory render-index
 uv run phistory render-site
@@ -31,6 +31,9 @@ The viewer is optimized for comparing prompt changes across releases. Top contro
 - Codex CLI (`@openai/codex`)
 - OpenClaw (`openclaw`)
 - Hermes Agent (`hermes-agent`)
+- Kimi CLI (`MoonshotAI/kimi-cli`)
+- opencode (`opencode-ai`)
+- Pi (`@earendil-works/pi-coding-agent`)
 
 ## Capture Format
 

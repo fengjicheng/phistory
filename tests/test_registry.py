@@ -2,7 +2,7 @@ from phistory.registry import get_agent, parse_agent_ids
 
 
 def test_parse_default_agents():
-    assert parse_agent_ids(None) == ["claude-code", "codex", "hermes", "openclaw"]
+    assert parse_agent_ids(None) == ["claude-code", "codex", "hermes", "kimi", "openclaw", "opencode", "pi"]
 
 
 def test_get_agent_has_capture_contract():
@@ -25,6 +25,9 @@ def test_claude_code_uses_full_prompt_surface_with_isolated_sessions():
 def test_new_agents_define_install_and_capture_profiles():
     openclaw = get_agent("openclaw")
     hermes = get_agent("hermes")
+    kimi = get_agent("kimi")
+    opencode = get_agent("opencode")
+    pi = get_agent("pi")
 
     assert openclaw.source == "npm"
     assert openclaw.home_profile == "openclaw"
@@ -37,3 +40,19 @@ def test_new_agents_define_install_and_capture_profiles():
     assert "chat" in hermes.run_args
     assert "-q" in hermes.run_args
     assert "openrouter" in hermes.run_args
+
+    assert kimi.source == "github-release"
+    assert kimi.package == "MoonshotAI/kimi-cli"
+    assert kimi.home_profile == "kimi"
+    assert "--print" in kimi.run_args
+
+    assert opencode.source == "npm"
+    assert opencode.package == "opencode-ai"
+    assert opencode.home_profile == "opencode"
+    assert opencode.tap_mode == "reverse"
+    assert "run" in opencode.run_args
+
+    assert pi.source == "npm"
+    assert pi.package == "@earendil-works/pi-coding-agent"
+    assert pi.home_profile == "pi"
+    assert pi.node_runtime is None

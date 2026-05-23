@@ -36,7 +36,7 @@ Phistory does not call the real model provider when exporting prompts. It relies
 Typical latest capture:
 
 ```bash
-uv run phistory capture --latest --agents claude-code,codex,openclaw,hermes
+uv run phistory capture --latest --agents claude-code,codex,openclaw,hermes,kimi,opencode,pi
 ```
 
 For each agent/version, the flow is:
@@ -59,6 +59,9 @@ Current agents are defined in `phistory/registry.py`:
 - `codex`: npm package `@openai/codex`, tap client `codex`, fake ChatGPT auth enabled.
 - `openclaw`: npm package `openclaw`, tap client `openclaw`, Node 24 wrapper, isolated OpenClaw config.
 - `hermes`: GitHub release source `NousResearch/hermes-agent`, tap client `hermes`, OpenRouter provider path.
+- `kimi`: GitHub release source `MoonshotAI/kimi-cli`, tap client `kimi`, isolated Kimi TOML config.
+- `opencode`: npm package `opencode-ai`, tap client `opencode`, reverse tap mode so opencode can fetch its model registry while the model request is redirected locally.
+- `pi`: npm package `@earendil-works/pi-coding-agent`, tap client `pi`, isolated Pi provider config.
 
 When adding another CLI, prefer extending the existing abstractions:
 
@@ -91,7 +94,7 @@ uv run pytest
 For capture-affecting changes, also run a local latest smoke:
 
 ```bash
-uv run phistory --root /tmp/phistory-smoke --cache-dir /tmp/phistory-smoke-cache capture --latest --agents claude-code,codex,openclaw,hermes --force
+uv run phistory --root /tmp/phistory-smoke --cache-dir /tmp/phistory-smoke-cache capture --latest --agents claude-code,codex,openclaw,hermes,kimi,opencode,pi --force
 ```
 
 For generated artifacts:

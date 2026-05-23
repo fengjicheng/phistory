@@ -104,7 +104,89 @@ HERMES = AgentSpec(
     ),
 )
 
-AGENTS: dict[str, AgentSpec] = {agent.id: agent for agent in (CLAUDE_CODE, CODEX, HERMES, OPENCLAW)}
+KIMI = AgentSpec(
+    id="kimi",
+    display_name="Kimi CLI",
+    package="MoonshotAI/kimi-cli",
+    source="github-release",
+    tap_client="kimi",
+    fake_env={
+        "OPENAI_API_KEY": "phistory-fake-api-key",
+        "KIMI_API_KEY": "phistory-fake-api-key",
+        "MOONSHOT_API_KEY": "phistory-fake-api-key",
+    },
+    extra_env={
+        "DISABLE_AUTOUPDATER": "1",
+        "DISABLE_UPDATES": "1",
+        "KIMI_TELEMETRY_DISABLED": "1",
+    },
+    home_profile="kimi",
+    run_args=(
+        "--no-yolo",
+        "--",
+        "--print",
+        "--prompt",
+        "Reply with one short sentence.",
+        "--model",
+        "phistory-dummy",
+        "--output-format",
+        "text",
+    ),
+)
+
+OPENCODE = AgentSpec(
+    id="opencode",
+    display_name="opencode",
+    package="opencode-ai",
+    tap_client="opencode",
+    fake_env={"OPENAI_API_KEY": "phistory-fake-api-key"},
+    extra_env={
+        "DISABLE_AUTOUPDATER": "1",
+        "DISABLE_UPDATES": "1",
+        "CI": "1",
+    },
+    home_profile="opencode",
+    tap_mode="reverse",
+    run_args=(
+        "--no-yolo",
+        "--",
+        "run",
+        "Reply with one short sentence.",
+        "--model",
+        "openai/gpt-4.1",
+        "--format",
+        "json",
+    ),
+)
+
+PI = AgentSpec(
+    id="pi",
+    display_name="Pi",
+    package="@earendil-works/pi-coding-agent",
+    tap_client="pi",
+    fake_env={"OPENAI_API_KEY": "phistory-fake-api-key"},
+    extra_env={
+        "DISABLE_AUTOUPDATER": "1",
+        "DISABLE_UPDATES": "1",
+        "CI": "1",
+    },
+    home_profile="pi",
+    run_args=(
+        "--no-yolo",
+        "--",
+        "--provider",
+        "phistory",
+        "--model",
+        "gpt-4.1",
+        "--print",
+        "--mode",
+        "text",
+        "--no-session",
+        "Reply with one short sentence.",
+    ),
+)
+
+AGENTS: dict[str, AgentSpec] = {agent.id: agent for agent in (CLAUDE_CODE, CODEX, HERMES, KIMI, OPENCLAW, OPENCODE, PI)}
 
 
 def get_agent(agent_id: str) -> AgentSpec:

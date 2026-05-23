@@ -128,10 +128,16 @@ def _capture_env(target: CaptureTarget, bin_dir: Path, home_dir: Path | None = N
         path.mkdir(parents=True, exist_ok=True)
     if target.agent.fake_chatgpt_auth:
         _write_fake_chatgpt_auth(home)
-    if target.agent.home_profile == "openclaw":
-        _write_openclaw_config(home)
     if target.agent.home_profile == "hermes":
         _write_hermes_config(home)
+    if target.agent.home_profile == "kimi":
+        _write_kimi_config(home)
+    if target.agent.home_profile == "openclaw":
+        _write_openclaw_config(home)
+    if target.agent.home_profile == "opencode":
+        _write_opencode_config(home)
+    if target.agent.home_profile == "pi":
+        _write_pi_config(home)
     env = {
         **target.agent.fake_env,
         **target.agent.extra_env,
@@ -148,6 +154,8 @@ def _capture_env(target: CaptureTarget, bin_dir: Path, home_dir: Path | None = N
     }
     if target.agent.home_profile == "hermes":
         env["HERMES_HOME"] = str(home / ".hermes")
+    if target.agent.home_profile == "kimi":
+        env["KIMI_SHARE_DIR"] = str(home / ".kimi")
     if target.agent.home_profile == "openclaw":
         env.update(
             {
@@ -155,6 +163,10 @@ def _capture_env(target: CaptureTarget, bin_dir: Path, home_dir: Path | None = N
                 "OPENCLAW_CONFIG_PATH": str(home / ".openclaw" / "openclaw.json"),
             }
         )
+    if target.agent.home_profile == "opencode":
+        env["OPENCODE_CONFIG"] = str(home / ".config" / "opencode" / "opencode.json")
+    if target.agent.home_profile == "pi":
+        env["PI_CODING_AGENT_DIR"] = str(home / ".pi" / "agent")
     if target.agent.fake_chatgpt_auth:
         env.update({"OPENAI_API_KEY": "", "CODEX_API_KEY": "", "CODEX_ACCESS_TOKEN": ""})
     return env
@@ -241,6 +253,69 @@ def _write_hermes_config(home: Path) -> None:
                 "",
             ]
         ),
+        encoding="utf-8",
+    )
+
+
+def _write_kimi_config(home: Path) -> None:
+    kimi_home = home / ".kimi"
+    kimi_home.mkdir(parents=True, exist_ok=True)
+    (kimi_home / "config.toml").write_text(
+        "\n".join(
+            [
+                'default_model = "phistory-dummy"',
+                "default_yolo = true",
+                "skip_afk_prompt_injection = true",
+                "",
+                "[providers.phistory]",
+                'type = "openai_responses"',
+                'base_url = "https://api.openai.com/v1"',
+                'api_key = "phistory-fake-api-key"',
+                "",
+                "[models.phistory-dummy]",
+                'provider = "phistory"',
+                'model = "gpt-4.1"',
+                "max_context_size = 200000",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+
+def _write_opencode_config(home: Path) -> None:
+    config_dir = home / ".config" / "opencode"
+    config_dir.mkdir(parents=True, exist_ok=True)
+    config = {
+        "$schema": "https://opencode.ai/config.json",
+        "model": "openai/gpt-4.1",
+        "provider": {
+            "openai": {
+                "options": {
+                    "apiKey": "phistory-fake-api-key",
+                }
+            }
+        },
+    }
+    (config_dir / "opencode.json").write_text(json.dumps(config, indent=2), encoding="utf-8")
+
+
+def _write_pi_config(home: Path) -> None:
+    pi_home = home / ".pi" / "agent"
+    pi_home.mkdir(parents=True, exist_ok=True)
+    models = {
+        "providers": {
+            "phistory": {
+                "api": "openai-responses",
+                "baseUrl": "https://api.openai.com/v1",
+                "apiKey": "phistory-fake-api-key",
+                "models": [{"id": "gpt-4.1", "name": "gpt-4.1"}],
+            }
+        }
+    }
+    (pi_home / "models.json").write_text(json.dumps(models, indent=2), encoding="utf-8")
+    (pi_home / "settings.json").write_text(
+        json.dumps({"defaultProvider": "phistory"}, indent=2),
         encoding="utf-8",
     )
 
