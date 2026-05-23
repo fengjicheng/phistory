@@ -14,6 +14,7 @@ from phistory.subprocesses import run
 
 _PLATFORM_VERSION_RE = re.compile(r"-(darwin|linux|win32)-(x64|arm64)$")
 _PYPI_PRERELEASE_RE = re.compile(r"(?:a|b|rc|dev)\d*$", re.IGNORECASE)
+INSTALL_TIMEOUT_SECONDS = 1800
 
 
 def latest_version(agent: AgentSpec) -> VersionInfo:
@@ -92,7 +93,7 @@ def _npm_versions(agent: AgentSpec, *, include_prerelease: bool) -> list[Version
 def _install_npm(agent: AgentSpec, version: str, install_dir: Path) -> Path:
     install_dir.mkdir(parents=True, exist_ok=True)
     package_ref = f"{agent.package}@{version}"
-    run([*agent.install_command, "--prefix", str(install_dir), package_ref], timeout=300)
+    run([*agent.install_command, "--prefix", str(install_dir), package_ref], timeout=INSTALL_TIMEOUT_SECONDS)
     bin_dir = install_dir / "node_modules" / ".bin"
     if not bin_dir.exists():
         raise RuntimeError(f"npm install did not create bin dir: {bin_dir}")
@@ -131,7 +132,10 @@ def _install_pypi(agent: AgentSpec, version: str, install_dir: Path) -> Path:
         shutil.rmtree(install_dir)
     install_dir.mkdir(parents=True, exist_ok=True)
     run(["uv", "venv", str(install_dir)], timeout=120)
-    run(["uv", "pip", "install", "--python", str(bin_dir / "python"), f"{agent.package}=={version}"], timeout=300)
+    run(
+        ["uv", "pip", "install", "--python", str(bin_dir / "python"), f"{agent.package}=={version}"],
+        timeout=INSTALL_TIMEOUT_SECONDS,
+    )
     if not (bin_dir / agent.tap_client).exists():
         raise RuntimeError(f"PyPI install did not create executable: {bin_dir / agent.tap_client}")
     return bin_dir
@@ -163,7 +167,7 @@ def _install_github_release(agent: AgentSpec, version: str, install_dir: Path) -
     install_dir.mkdir(parents=True, exist_ok=True)
     run(["uv", "venv", str(install_dir)], timeout=120)
     package_ref = f"https://github.com/{agent.package}/archive/refs/tags/{version}.tar.gz"
-    run(["uv", "pip", "install", "--python", str(bin_dir / "python"), package_ref], timeout=600)
+    run(["uv", "pip", "install", "--python", str(bin_dir / "python"), package_ref], timeout=INSTALL_TIMEOUT_SECONDS)
     if not (bin_dir / agent.tap_client).exists():
         raise RuntimeError(f"GitHub release install did not create executable: {bin_dir / agent.tap_client}")
     return bin_dir

@@ -32,6 +32,7 @@ def build_parser() -> argparse.ArgumentParser:
     fill.add_argument("--from", dest="start", required=True, help="first package version to capture")
     fill.add_argument("--to", dest="end", default="latest", help="last package version to capture")
     fill.add_argument("--limit", type=int, default=None, help="capture at most N versions from the range")
+    fill.add_argument("--newest-first", action="store_true", help="capture the selected range from newest to oldest")
     fill.add_argument("--include-prerelease", action="store_true", help="include prerelease package versions")
     fill.add_argument("--force", action="store_true", help="recapture existing versions")
     fill.add_argument("--keep-tap", action="store_true", help="keep raw claude-tap output directories")
@@ -73,6 +74,7 @@ def main(argv: list[str] | None = None) -> int:
             force=args.force,
             keep_tap=args.keep_tap,
             limit=args.limit,
+            newest_first=args.newest_first,
             include_prerelease=args.include_prerelease,
         ):
             failed = _print_result(result) or failed

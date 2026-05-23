@@ -37,10 +37,13 @@ def backfill(
     force: bool = False,
     keep_tap: bool = False,
     limit: int | None = None,
+    newest_first: bool = False,
     include_prerelease: bool = False,
 ) -> list[CaptureResult]:
     agent = get_agent(agent_id)
     versions: list[VersionInfo] = packages.versions_between(agent, start, end, include_prerelease=include_prerelease)
+    if newest_first:
+        versions = list(reversed(versions))
     if limit is not None:
         versions = versions[:limit]
     return [
@@ -59,10 +62,13 @@ def iter_backfill(
     force: bool = False,
     keep_tap: bool = False,
     limit: int | None = None,
+    newest_first: bool = False,
     include_prerelease: bool = False,
 ) -> Iterator[CaptureResult]:
     agent = get_agent(agent_id)
     versions: list[VersionInfo] = packages.versions_between(agent, start, end, include_prerelease=include_prerelease)
+    if newest_first:
+        versions = list(reversed(versions))
     if limit is not None:
         versions = versions[:limit]
     for version in versions:

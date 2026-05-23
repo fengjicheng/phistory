@@ -32,6 +32,8 @@ _VOLATILE_TEXT_PATTERNS = (
     (re.compile(r"Bearer phistory-[A-Za-z0-9_-]+"), "Bearer <redacted>"),
 )
 
+CAPTURE_TIMEOUT_SECONDS = 1800
+
 
 def capture_target(
     target: CaptureTarget,
@@ -77,17 +79,17 @@ def capture_target(
                 *_tap_mode_args(target),
                 *target.agent.run_args,
             ]
-            result = run(argv, cwd=Path(work_dir), env=env, timeout=180, check=False)
+            result = run(argv, cwd=Path(work_dir), env=env, timeout=CAPTURE_TIMEOUT_SECONDS, check=False)
             if _needs_claude_session_persistence_retry(target, result):
                 remove_if_exists(tap_output_dir)
                 prompt_path.unlink(missing_ok=True)
                 argv = _without_arg(argv, "--no-session-persistence")
-                result = run(argv, cwd=Path(work_dir), env=env, timeout=180, check=False)
+                result = run(argv, cwd=Path(work_dir), env=env, timeout=CAPTURE_TIMEOUT_SECONDS, check=False)
             if _needs_codex_api_key_retry(target, result):
                 remove_if_exists(tap_output_dir)
                 prompt_path.unlink(missing_ok=True)
                 env = {**env, "OPENAI_API_KEY": "phistory-fake-api-key"}
-                result = run(argv, cwd=Path(work_dir), env=env, timeout=180, check=False)
+                result = run(argv, cwd=Path(work_dir), env=env, timeout=CAPTURE_TIMEOUT_SECONDS, check=False)
         if result.returncode != 0 or not prompt_path.exists():
             detail = (result.stderr or result.stdout).strip()[-4000:]
             raise RuntimeError(f"capture command failed ({result.returncode})\n{detail}")

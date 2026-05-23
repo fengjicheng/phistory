@@ -184,6 +184,11 @@ Each capture is stored under `captures/<agent>/<version>/`:
 | Kimi CLI | `1.42.0` | 2026-05-11 04:04 UTC | 2026-05-23 07:52 UTC | [kimi 1.42.0, published 2026-05-11 04:04 UTC](captures/kimi/1.42.0/prompt.md) | [trace.jsonl](captures/kimi/1.42.0/trace.jsonl) |
 | Kimi CLI | `1.41.0` | 2026-04-30 14:07 UTC | 2026-05-23 07:44 UTC | [kimi 1.41.0, published 2026-04-30 14:07 UTC](captures/kimi/1.41.0/prompt.md) | [trace.jsonl](captures/kimi/1.41.0/trace.jsonl) |
 | Kimi CLI | `1.40.0` | 2026-04-28 13:51 UTC | 2026-05-23 07:38 UTC | [kimi 1.40.0, published 2026-04-28 13:51 UTC](captures/kimi/1.40.0/prompt.md) | [trace.jsonl](captures/kimi/1.40.0/trace.jsonl) |
+| Kimi CLI | `1.39.0` | 2026-04-24 06:22 UTC | 2026-05-23 11:12 UTC | [kimi 1.39.0, published 2026-04-24 06:22 UTC](captures/kimi/1.39.0/prompt.md) | [trace.jsonl](captures/kimi/1.39.0/trace.jsonl) |
+| Kimi CLI | `1.38.0` | 2026-04-22 16:26 UTC | 2026-05-23 10:38 UTC | [kimi 1.38.0, published 2026-04-22 16:26 UTC](captures/kimi/1.38.0/prompt.md) | [trace.jsonl](captures/kimi/1.38.0/trace.jsonl) |
+| Kimi CLI | `1.37.0` | 2026-04-20 16:01 UTC | 2026-05-23 10:36 UTC | [kimi 1.37.0, published 2026-04-20 16:01 UTC](captures/kimi/1.37.0/prompt.md) | [trace.jsonl](captures/kimi/1.37.0/trace.jsonl) |
+| Kimi CLI | `1.36.0` | 2026-04-17 14:10 UTC | 2026-05-23 10:35 UTC | [kimi 1.36.0, published 2026-04-17 14:10 UTC](captures/kimi/1.36.0/prompt.md) | [trace.jsonl](captures/kimi/1.36.0/trace.jsonl) |
+| Kimi CLI | `1.35.0` | 2026-04-15 12:55 UTC | 2026-05-23 10:34 UTC | [kimi 1.35.0, published 2026-04-15 12:55 UTC](captures/kimi/1.35.0/prompt.md) | [trace.jsonl](captures/kimi/1.35.0/trace.jsonl) |
 | Kimi CLI | `1.6` | 2026-02-02 17:26 UTC | 2026-05-23 08:30 UTC | [kimi 1.6, published 2026-02-02 17:26 UTC](captures/kimi/1.6/prompt.md) | [trace.jsonl](captures/kimi/1.6/trace.jsonl) |
 | Kimi CLI | `1.4` | 2026-01-30 11:37 UTC | 2026-05-23 08:20 UTC | [kimi 1.4, published 2026-01-30 11:37 UTC](captures/kimi/1.4/prompt.md) | [trace.jsonl](captures/kimi/1.4/trace.jsonl) |
 | Kimi CLI | `1.3` | 2026-01-28 07:50 UTC | 2026-05-23 08:18 UTC | [kimi 1.3, published 2026-01-28 07:50 UTC](captures/kimi/1.3/prompt.md) | [trace.jsonl](captures/kimi/1.3/trace.jsonl) |

@@ -1,5 +1,6 @@
 from phistory.models import AgentSpec, VersionInfo
 from phistory.packages import _github_headers, all_versions, latest_version, versions_between
+from phistory.workflow import iter_backfill
 
 
 def test_versions_between_uses_registry_order(monkeypatch):
@@ -136,3 +137,35 @@ def test_github_headers_can_skip_auth(monkeypatch):
 
     assert "Authorization" in _github_headers()
     assert "Authorization" not in _github_headers(use_auth=False)
+
+
+def test_iter_backfill_can_walk_newest_first(monkeypatch, tmp_path):
+    agent = AgentSpec(
+        id="x",
+        display_name="X",
+        package="x",
+        tap_client="x",
+        fake_env={},
+        run_args=(),
+    )
+    monkeypatch.setattr("phistory.workflow.get_agent", lambda _agent_id: agent)
+    monkeypatch.setattr(
+        "phistory.workflow.packages.versions_between",
+        lambda *_args, **_kwargs: [VersionInfo("1.0.0"), VersionInfo("1.1.0"), VersionInfo("2.0.0")],
+    )
+    monkeypatch.setattr(
+        "phistory.workflow.capture_target",
+        lambda target, **_kwargs: target.version.version,
+    )
+
+    assert list(
+        iter_backfill(
+            "x",
+            start="1.0.0",
+            end="2.0.0",
+            root=tmp_path,
+            cache_dir=tmp_path / "cache",
+            newest_first=True,
+            limit=2,
+        )
+    ) == ["2.0.0", "1.1.0"]
