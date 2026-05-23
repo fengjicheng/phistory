@@ -134,6 +134,8 @@ Each capture is stored under `captures/<agent>/<version>/`:
 | OpenClaw | `2026.1.30` | 2026-01-31 13:11 UTC | 2026-05-22 12:32 UTC | [openclaw 2026.1.30, published 2026-01-31 13:11 UTC](captures/openclaw/2026.1.30/prompt.md) | [trace.jsonl](captures/openclaw/2026.1.30/trace.jsonl) |
 | OpenClaw | `2026.1.29` | 2026-01-30 04:49 UTC | 2026-05-22 12:32 UTC | [openclaw 2026.1.29, published 2026-01-30 04:49 UTC](captures/openclaw/2026.1.29/prompt.md) | [trace.jsonl](captures/openclaw/2026.1.29/trace.jsonl) |
 | Kimi CLI | `1.44.0` | 2026-05-14 05:40 UTC | 2026-05-23 07:30 UTC | [kimi 1.44.0, published 2026-05-14 05:40 UTC](captures/kimi/1.44.0/prompt.md) | [trace.jsonl](captures/kimi/1.44.0/trace.jsonl) |
+| Kimi CLI | `1.43.0` | 2026-05-12 13:04 UTC | 2026-05-23 07:52 UTC | [kimi 1.43.0, published 2026-05-12 13:04 UTC](captures/kimi/1.43.0/prompt.md) | [trace.jsonl](captures/kimi/1.43.0/trace.jsonl) |
+| Kimi CLI | `1.42.0` | 2026-05-11 04:04 UTC | 2026-05-23 07:52 UTC | [kimi 1.42.0, published 2026-05-11 04:04 UTC](captures/kimi/1.42.0/prompt.md) | [trace.jsonl](captures/kimi/1.42.0/trace.jsonl) |
 | Kimi CLI | `1.41.0` | 2026-04-30 14:07 UTC | 2026-05-23 07:44 UTC | [kimi 1.41.0, published 2026-04-30 14:07 UTC](captures/kimi/1.41.0/prompt.md) | [trace.jsonl](captures/kimi/1.41.0/trace.jsonl) |
 | Kimi CLI | `1.40.0` | 2026-04-28 13:51 UTC | 2026-05-23 07:38 UTC | [kimi 1.40.0, published 2026-04-28 13:51 UTC](captures/kimi/1.40.0/prompt.md) | [trace.jsonl](captures/kimi/1.40.0/trace.jsonl) |
 | Hermes Agent | `v2026.5.16` | 2026-05-16 09:59 UTC | 2026-05-22 12:31 UTC | [hermes v2026.5.16, published 2026-05-16 09:59 UTC](captures/hermes/v2026.5.16/prompt.md) | [trace.jsonl](captures/hermes/v2026.5.16/trace.jsonl) |
