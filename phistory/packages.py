@@ -181,13 +181,17 @@ def _pypi_json(package: str) -> dict:
 def _github_releases(repo: str) -> list[dict]:
     page = 1
     releases: list[dict] = []
+    use_auth = _github_token() is not None
     while True:
         url = f"https://api.github.com/repos/{repo}/releases?per_page=100&page={page}"
-        request = urllib.request.Request(url, headers=_github_headers())
+        request = urllib.request.Request(url, headers=_github_headers(use_auth=use_auth))
         try:
             with urllib.request.urlopen(request, timeout=120) as response:
                 data = json.load(response)
         except (HTTPError, IncompleteRead) as exc:
+            if isinstance(exc, HTTPError) and exc.code == 401 and use_auth:
+                use_auth = False
+                continue
             if isinstance(exc, IncompleteRead) or exc.code == 403:
                 return _github_releases_via_gh(repo)
             raise
@@ -199,15 +203,19 @@ def _github_releases(repo: str) -> list[dict]:
         page += 1
 
 
-def _github_headers() -> dict[str, str]:
+def _github_headers(*, use_auth: bool = True) -> dict[str, str]:
     headers = {
         "Accept": "application/vnd.github+json",
         "User-Agent": "phistory",
     }
-    token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
-    if token:
+    token = _github_token()
+    if use_auth and token:
         headers["Authorization"] = f"Bearer {token}"
     return headers
+
+
+def _github_token() -> str | None:
+    return os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN") or None
 
 
 def _github_releases_via_gh(repo: str) -> list[dict]:

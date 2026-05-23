@@ -1,5 +1,5 @@
 from phistory.models import AgentSpec, VersionInfo
-from phistory.packages import all_versions, latest_version, versions_between
+from phistory.packages import _github_headers, all_versions, latest_version, versions_between
 
 
 def test_versions_between_uses_registry_order(monkeypatch):
@@ -129,3 +129,10 @@ def test_github_release_versions_are_sorted_by_publish_time(monkeypatch):
     assert latest_version(agent).version == "v2"
     assert [item.version for item in all_versions(agent)] == ["v1", "v2"]
     assert [item.version for item in all_versions(agent, include_prerelease=True)] == ["v1", "v2", "v3-beta"]
+
+
+def test_github_headers_can_skip_auth(monkeypatch):
+    monkeypatch.setenv("GH_TOKEN", "bad-token")
+
+    assert "Authorization" in _github_headers()
+    assert "Authorization" not in _github_headers(use_auth=False)
