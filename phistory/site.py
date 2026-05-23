@@ -244,12 +244,20 @@ a:hover { text-decoration: none; }
   max-width: 128px;
 }
 .agent-control::after {
-  content: "⌄";
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
   color: var(--muted);
-  font-size: 13px;
-  line-height: 1;
   margin-left: auto;
-  transform: translateY(-1px);
+  transform: rotate(45deg) translate(-1px, -1px);
+  transform-origin: center;
+  transition: transform .14s ease, color .14s ease;
+}
+.agent-control[aria-expanded="true"]::after {
+  color: var(--text);
+  transform: rotate(225deg) translate(-1px, -1px);
 }
 .agent-icon {
   width: 17px;
@@ -578,9 +586,9 @@ function writeQuery() {
 }
 
 function bindEvents() {
-  els.agent.addEventListener('click', () => openPicker('agent', els.agent));
-  els.from.addEventListener('click', () => openPicker('from', els.from));
-  els.to.addEventListener('click', () => openPicker('to', els.to));
+  els.agent.addEventListener('click', () => togglePicker('agent', els.agent));
+  els.from.addEventListener('click', () => togglePicker('from', els.from));
+  els.to.addEventListener('click', () => togglePicker('to', els.to));
   els.theme.addEventListener('click', toggleTheme);
   els.diff.addEventListener('focusin', guardMobileEditorFocus);
   addEventListener('click', event => {
@@ -611,6 +619,14 @@ function agentIconHtml(agent) {
 
 function versionLabel(item) {
   return `<strong>${escapeHtml(item.version)}</strong><small>${escapeHtml(item.published_compact)}</small>`;
+}
+
+function togglePicker(kind, anchor) {
+  if (state.picker === kind && els.popover.classList.contains('open')) {
+    closePicker();
+    return;
+  }
+  openPicker(kind, anchor);
 }
 
 function openPicker(kind, anchor) {
