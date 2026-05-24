@@ -37,7 +37,9 @@ def test_capture_paths_and_index(tmp_path: Path):
     out = tmp_path / "INDEX.md"
     render_index(tmp_path / "captures", out)
     text = out.read_text(encoding="utf-8")
+    zh_text = (tmp_path / "README_zh.md").read_text(encoding="utf-8")
     assert "Agent" in text
+    assert "[中文](README_zh.md)" in text
     assert "archives versioned system prompt snapshots" in text
     assert "claude-tap" in text
     assert "GitHub Actions checks supported CLI releases every hour" in text
@@ -47,6 +49,13 @@ def test_capture_paths_and_index(tmp_path: Path):
     assert "[1.0.0 - 2026-05-22]" in text
     assert "2026-05-22 01:00 UTC" in text
     assert "| Agent | Version | Published | Captured | Snapshot | Raw Trace |" not in text
+    assert "[English](README.md)" in zh_text
+    assert "自动归档 Claude Code" in zh_text
+    assert "每小时检查一次支持的 CLI 版本" in zh_text
+    assert "## 抓取状态" in zh_text
+    assert "| Agent | 最新版本 | 快照数 | 最近抓取 |" in zh_text
+    assert "[1.0.0 - 2026-05-22]" in zh_text
+    assert "## License" not in zh_text
 
     capture_doc = tmp_path / "docs/captures.md"
     capture_index = tmp_path / "captures/index.json"
