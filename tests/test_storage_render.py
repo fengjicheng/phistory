@@ -40,12 +40,22 @@ def test_capture_paths_and_index(tmp_path: Path):
     assert "Agent" in text
     assert "archives versioned system prompt snapshots" in text
     assert "claude-tap" in text
-    assert "GitHub Actions checks for new supported CLI versions every hour" in text
-    assert "## Latest Captures" in text
-    assert "- Agent: `1.0.0` published 2026-05-22 00:00 UTC, captured 2026-05-22 01:00 UTC" in text
+    assert "GitHub Actions checks supported CLI releases every hour" in text
+    assert "## Capture Status" in text
+    assert "| Agent | Latest | Captures | Last Captured |" in text
     assert "captures/agent/1.0.0/prompt.md" in text
-    assert "[agent 1.0.0, published 2026-05-22 00:00 UTC]" in text
+    assert "[1.0.0 - 2026-05-22]" in text
     assert "2026-05-22 01:00 UTC" in text
+    assert "| Agent | Version | Published | Captured | Snapshot | Raw Trace |" not in text
+
+    capture_doc = tmp_path / "docs/captures.md"
+    capture_index = tmp_path / "captures/index.json"
+    capture_doc_text = capture_doc.read_text(encoding="utf-8")
+    capture_index_json = json.loads(capture_index.read_text(encoding="utf-8"))
+    assert "| Agent | Version | Published | Captured | Snapshot | Raw Trace |" in capture_doc_text
+    assert "[agent 1.0.0, published 2026-05-22 00:00 UTC]" in capture_doc_text
+    assert capture_index_json["agents"][0]["latest_version"] == "1.0.0"
+    assert capture_index_json["captures"][0]["prompt"] == "captures/agent/1.0.0/prompt.md"
 
 
 def test_capture_is_incomplete_without_trace(tmp_path: Path):
@@ -85,7 +95,10 @@ def test_render_index_sorts_versions_numerically(tmp_path: Path):
     render_index(tmp_path / "captures", out)
     text = out.read_text(encoding="utf-8")
 
-    assert text.index("`2.1.146`") < text.index("`2.1.99`")
+    assert "[2.1.146]" in text
+    assert "[2.1.99]" not in text
+    capture_doc_text = (tmp_path / "docs/captures.md").read_text(encoding="utf-8")
+    assert capture_doc_text.index("`2.1.146`") < capture_doc_text.index("`2.1.99`")
 
 
 def test_render_site_writes_static_html_manifest(tmp_path: Path):
@@ -120,6 +133,8 @@ def test_render_site_writes_static_html_manifest(tmp_path: Path):
 
     assert "<!doctype html>" in text
     assert "Phistory" in text
+    assert "OpenClaw" in text
+    assert "application/ld+json" in text
     assert "captures/agent/1.1.0/prompt.md" in text
     assert "2026-05-22" in text
     assert "monaco-editor" in text

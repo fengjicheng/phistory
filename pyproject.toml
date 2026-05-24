@@ -1,7 +1,7 @@
 [project]
 name = "phistory"
 version = "0.1.0"
-description = "Versioned prompt snapshots for agent CLIs."
+description = "Automatically archived system prompt snapshots and diffs for agent CLIs."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"

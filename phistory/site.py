@@ -1,10 +1,8 @@
-from __future__ import annotations
-
 import json
 from datetime import datetime, timezone
 from pathlib import Path
 
-from phistory.render import _version_key
+from phistory.render import _version_key, read_capture_rows
 
 AGENT_ICONS = {
     "claude-code": "docs/agent-icons/claude-code.png",
@@ -22,8 +20,7 @@ def render_site(root: Path, output: Path) -> None:
 
 
 def _build_manifest(root: Path) -> dict:
-    rows = [_capture_row(meta_path) for meta_path in sorted(root.glob("*/*/meta.json"))]
-    rows = [row for row in rows if row is not None]
+    rows = [_site_row(row) for row in read_capture_rows(root)]
     agents = []
     for agent_id in sorted({row["agent_id"] for row in rows}):
         versions = sorted(
@@ -44,27 +41,13 @@ def _build_manifest(root: Path) -> dict:
     return {"agents": agents, "count": len(rows)}
 
 
-def _capture_row(meta_path: Path) -> dict | None:
-    try:
-        meta = json.loads(meta_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return None
-
-    version_dir = meta_path.parent
-    prompt = version_dir / "prompt.md"
-    trace = version_dir / "trace.jsonl"
-    if not prompt.exists() or not trace.exists():
-        return None
-
-    published_at = meta.get("published_at") or ""
-    agent_id = meta.get("agent_id") or version_dir.parent.name
-    prompt_path = prompt.as_posix()
+def _site_row(row: dict) -> dict:
     return {
-        "agent_id": agent_id,
-        "agent": meta.get("agent") or agent_id,
-        "version": meta.get("version") or version_dir.name,
-        "published_compact": _compact_date(published_at),
-        "prompt": prompt_path,
+        "agent_id": row["agent_id"],
+        "agent": row["agent"],
+        "version": row["version"],
+        "published_compact": _compact_date(row["published_at"]),
+        "prompt": row["prompt"].as_posix(),
     }
 
 
@@ -97,21 +80,36 @@ _HTML = r"""<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Phistory automatically archives versioned system prompt snapshots from agent CLIs like Claude Code, Codex, Kimi, opencode, and Pi.">
-<meta name="keywords" content="Phistory, system prompt history, Claude Code prompt, Codex CLI prompt, Kimi CLI prompt, opencode prompt, Pi prompt, agent CLI, prompt diff, prompt archive">
+<meta name="description" content="Phistory automatically archives versioned system prompt snapshots and diffs from agent CLIs like Claude Code, Codex, OpenClaw, Hermes, Kimi, opencode, and Pi.">
+<meta name="keywords" content="Phistory, system prompt history, system prompt diff, Claude Code prompt, Codex CLI prompt, OpenClaw prompt, Hermes prompt, Kimi CLI prompt, opencode prompt, Pi prompt, agent CLI, prompt archive">
 <meta name="application-name" content="Phistory">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#1c1c1e" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#fbfbfa" media="(prefers-color-scheme: light)">
 <meta property="og:title" content="Phistory">
-<meta property="og:description" content="Automatically archived system prompt snapshots and diffs for agent CLIs like Claude Code, Codex, Kimi, opencode, and Pi.">
+<meta property="og:description" content="Automatically archived system prompt snapshots and diffs for agent CLIs like Claude Code, Codex, OpenClaw, Hermes, Kimi, opencode, and Pi.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://phistory.cc/">
 <meta property="og:image" content="https://phistory.cc/docs/screenshot.png">
+<meta property="og:site_name" content="Phistory">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Phistory">
-<meta name="twitter:description" content="Automatically archived system prompt snapshots and diffs for agent CLIs like Claude Code, Codex, Kimi, opencode, and Pi.">
+<meta name="twitter:description" content="Automatically archived system prompt snapshots and diffs for agent CLIs like Claude Code, Codex, OpenClaw, Hermes, Kimi, opencode, and Pi.">
 <meta name="twitter:image" content="https://phistory.cc/docs/screenshot.png">
 <link rel="canonical" href="https://phistory.cc/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230f1115'/%3E%3Cpath d='M8 10h16M8 16h10M8 22h14' stroke='%237cc7ff' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
 <title>Phistory - Agent CLI System Prompt Diff History</title>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Phistory",
+  "url": "https://phistory.cc/",
+  "description": "Automatically archived system prompt snapshots and diffs for agent CLIs.",
+  "sameAs": ["https://github.com/WEIFENG2333/phistory"],
+  "about": ["Claude Code", "Codex CLI", "OpenClaw", "Hermes", "Kimi CLI", "opencode", "Pi"]
+}
+</script>
 <style>
 :root {
   color-scheme: dark;
