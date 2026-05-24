@@ -60,10 +60,6 @@ The generated indexes are:
 
 - [linux.do](https://linux.do)
 
-## License
-
-[MIT](LICENSE)
-
 ## Capture Status
 
 Last capture update: 2026-05-24 04:40 UTC

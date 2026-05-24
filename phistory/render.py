@@ -125,10 +125,6 @@ def _readme_markdown(rows: list[dict[str, Any]], base: Path) -> str:
         "",
         "- [linux.do](https://linux.do)",
         "",
-        "## License",
-        "",
-        "[MIT](LICENSE)",
-        "",
     ]
 
     lines.extend(["## Capture Status", ""])
