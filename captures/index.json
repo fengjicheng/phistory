@@ -1,7 +1,7 @@
 {
   "description": "Phistory automatically archives versioned system prompt snapshots from agent CLIs like Claude Code, Codex, OpenClaw, Hermes, Kimi, opencode, and Pi.",
   "site": "https://phistory.cc/",
-  "updated_at": "2026-05-27T04:49:19.750509Z",
+  "updated_at": "2026-05-27T16:52:39.544305Z",
   "agents": [
     {
       "agent_id": "claude-code",
@@ -38,10 +38,10 @@
     {
       "agent_id": "openclaw",
       "agent": "OpenClaw",
-      "latest_version": "2026.5.22",
-      "latest_published_at": "2026-05-24T03:20:32.592Z",
-      "latest_captured_at": "2026-05-24T04:40:22.176683+00:00",
-      "captures": 57
+      "latest_version": "2026.5.26",
+      "latest_published_at": "2026-05-27T12:38:41.427Z",
+      "latest_captured_at": "2026-05-27T16:52:39.544305+00:00",
+      "captures": 58
     },
     {
       "agent_id": "opencode",
@@ -770,6 +770,16 @@
       "prompt": "captures/opencode/1.4.0/prompt.md",
       "trace": "captures/opencode/1.4.0/trace.jsonl",
       "meta": "captures/opencode/1.4.0/meta.json"
+    },
+    {
+      "agent_id": "openclaw",
+      "agent": "OpenClaw",
+      "version": "2026.5.26",
+      "published_at": "2026-05-27T12:38:41.427Z",
+      "captured_at": "2026-05-27T16:52:39.544305+00:00",
+      "prompt": "captures/openclaw/2026.5.26/prompt.md",
+      "trace": "captures/openclaw/2026.5.26/trace.jsonl",
+      "meta": "captures/openclaw/2026.5.26/meta.json"
     },
     {
       "agent_id": "openclaw",
