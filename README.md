@@ -64,14 +64,14 @@ The generated indexes are:
 
 ## Capture Status
 
-Last capture update: 2026-05-28 12:47 UTC
+Last capture update: 2026-05-28 19:46 UTC
 
 | Agent | Latest | Captures | Last Captured |
 | --- | --- | ---: | --- |
-| Claude Code | [2.1.153 - 2026-05-27](captures/claude-code/2.1.153/prompt.md) | 322 | 2026-05-28 04:40 UTC |
-| Codex CLI | [0.134.0 - 2026-05-26](captures/codex/0.134.0/prompt.md) | 49 | 2026-05-26 22:00 UTC |
-| Hermes Agent | [v2026.5.16 - 2026-05-16](captures/hermes/v2026.5.16/prompt.md) | 11 | 2026-05-22 12:31 UTC |
+| Claude Code | [2.1.154 - 2026-05-28](captures/claude-code/2.1.154/prompt.md) | 323 | 2026-05-28 19:46 UTC |
+| Codex CLI | [0.135.0 - 2026-05-28](captures/codex/0.135.0/prompt.md) | 50 | 2026-05-28 19:46 UTC |
+| Hermes Agent | [v2026.5.28 - 2026-05-28](captures/hermes/v2026.5.28/prompt.md) | 12 | 2026-05-28 19:46 UTC |
 | Kimi CLI | [1.45.0 - 2026-05-27](captures/kimi/1.45.0/prompt.md) | 17 | 2026-05-27 04:49 UTC |
 | OpenClaw | [2026.5.27 - 2026-05-28](captures/openclaw/2026.5.27/prompt.md) | 59 | 2026-05-28 12:47 UTC |
-| opencode | [1.15.11 - 2026-05-27](captures/opencode/1.15.11/prompt.md) | 62 | 2026-05-27 04:49 UTC |
+| opencode | [1.15.12 - 2026-05-28](captures/opencode/1.15.12/prompt.md) | 63 | 2026-05-28 19:46 UTC |
 | Pi | [0.76.0 - 2026-05-27](captures/pi/0.76.0/prompt.md) | 10 | 2026-05-27 22:09 UTC |
