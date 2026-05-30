@@ -149,7 +149,7 @@ def test_render_site_writes_static_html_manifest(tmp_path: Path):
     assert "monaco-editor" in text
     assert "createDiffEditor" in text
     assert "range: 'latest'" in text
-    assert "change-spark" in text
+    assert "mini-diffstat" in text
     assert '"previous_version":"1.0.0"' in text
     assert '"changed_lines":2' in text
     assert '"level":1' in text

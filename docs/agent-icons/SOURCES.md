@@ -1,23 +1,22 @@
 # Agent Icon Sources
 
-Phistory uses compact local copies of official or project-owned visual assets for the agent selector. The copies are resized for UI use only; the original identity is intentionally preserved.
+Phistory uses compact local copies of product-level visual assets for the agent selector. The copies are resized or cropped for UI use only; the original product identity is intentionally preserved.
 
 | Agent | Local asset | Source |
 | --- | --- | --- |
-| Claude Code | `claude-code.png` | Anthropic GitHub organization avatar from `anthropics/claude-code`: `https://avatars.githubusercontent.com/u/76263028` |
-| Codex CLI | `codex.png` | OpenAI GitHub organization avatar from `openai/codex`: `https://avatars.githubusercontent.com/u/14957082` |
-| Hermes Agent | `hermes.png` | NousResearch GitHub organization avatar from `NousResearch/hermes-agent`: `https://avatars.githubusercontent.com/u/134168893` |
-| Kimi CLI | `kimi.png` | MoonshotAI GitHub organization avatar from `MoonshotAI/kimi-cli`: `https://avatars.githubusercontent.com/u/129152888` |
-| OpenClaw | `openclaw.png` | OpenClaw GitHub organization avatar from `openclaw/openclaw`: `https://avatars.githubusercontent.com/u/252820863` |
-| opencode | `opencode.png` | Anomaly GitHub organization avatar from `anomalyco/opencode`: `https://avatars.githubusercontent.com/u/66570915` |
-| Pi | `pi.png` | Earendil Works GitHub organization avatar from `earendil-works/pi`: `https://avatars.githubusercontent.com/u/207902832` |
+| Claude Code | `claude-code.png` | Claude Code documentation favicon from `https://code.claude.com/docs/en/overview`: `https://code.claude.com/docs/_mintlify/favicons/claude-code/pLsy-mRpNksna2sx/_generated/favicon/apple-touch-icon.png` |
+| Codex CLI | `codex.png` | Codex product icon cropped from the official OpenAI Codex setup screenshot on `https://openai.com/codex/get-started/`: `https://images.ctfassets.net/kftzwdyauwt9/6JttRtGUPpCuYGQvs0PCjP/9c54a8e25f76148598e903bed1bddac0/Installer2.png` |
+| Hermes Agent | `hermes.png` | Hermes Agent product site apple-touch-icon from `https://hermes-agent.org/about/`: `https://hermes-agent.org/apple-touch-icon.png` |
+| Kimi CLI | `kimi.png` | Kimi product icon from Moonshot/Kimi site: `https://statics.moonshot.cn/moonshot-ai/assets/static/kimi-icon.ByIGCGon.webp` |
+| OpenClaw | `openclaw.png` | OpenClaw product site apple-touch-icon from `https://openclaw.ai/`: `https://openclaw.ai/apple-touch-icon.png` |
+| opencode | `opencode.png` | opencode product site apple-touch-icon from `https://opencode.ai/`: `https://opencode.ai/apple-touch-icon-v3.png` |
+| Pi | `pi.png` | Pi Coding Agent product site favicon from `https://pi.dev/`: `https://pi.dev/favicon.svg` |
 
-Related official/project assets inspected:
+Additional assets inspected:
 
-- OpenClaw README logo: `https://raw.githubusercontent.com/openclaw/openclaw/main/docs/assets/openclaw-logo-text.svg`
-- Hermes website logo: `https://raw.githubusercontent.com/NousResearch/hermes-agent/main/website/static/img/logo.png`
-- Hermes favicon: `https://raw.githubusercontent.com/NousResearch/hermes-agent/main/website/static/img/favicon.svg`
-- Codex repository splash image: `https://raw.githubusercontent.com/openai/codex/main/.github/codex-cli-splash.png`
-- Kimi CLI repository: `https://github.com/MoonshotAI/kimi-cli`
-- opencode repository: `https://github.com/anomalyco/opencode`
-- Pi repository: `https://github.com/earendil-works/pi`
+- Claude marketing page: `https://claude.com/solutions/coding`
+- OpenAI Codex app announcement and setup pages: `https://openai.com/index/introducing-the-codex-app/`, `https://openai.com/codex/get-started/`
+- Hermes model site: `https://hermes-ai.net/`
+- OpenClaw alternate domain: `https://www.openclaw.org/`
+- Kimi and Moonshot pages: `https://www.kimi.com/`, `https://www.moonshot.ai`
+- opencode and Pi product pages: `https://opencode.ai/`, `https://pi.dev/`

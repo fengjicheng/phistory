@@ -185,8 +185,9 @@ _HTML = r"""<!doctype html>
   --menu-active: rgba(255, 255, 255, .11);
   --focus-line: rgba(255, 255, 255, .34);
   --scrollbar: rgba(255, 255, 255, .22);
-  --spark-quiet: rgba(255, 255, 255, .26);
-  --spark-live: #7ab7e6;
+  --diffstat-track: rgba(255, 255, 255, .16);
+  --diffstat-add: #3fb950;
+  --diffstat-remove: #f85149;
 }
 :root[data-theme="light"] {
   color-scheme: light;
@@ -203,8 +204,9 @@ _HTML = r"""<!doctype html>
   --menu-active: rgba(0, 0, 0, .07);
   --focus-line: rgba(0, 0, 0, .30);
   --scrollbar: rgba(0, 0, 0, .22);
-  --spark-quiet: rgba(0, 0, 0, .28);
-  --spark-live: #0a66b2;
+  --diffstat-track: rgba(0, 0, 0, .14);
+  --diffstat-add: #1f883d;
+  --diffstat-remove: #cf222e;
 }
 * { box-sizing: border-box; }
 html, body { height: 100%; }
@@ -502,50 +504,43 @@ a:hover { text-decoration: none; }
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.change-spark {
-  width: 28px;
-  height: 16px;
-  display: inline-flex;
-  align-items: flex-end;
+.mini-diffstat {
+  --add-width: 0%;
+  --remove-width: 0%;
+  width: 38px;
+  height: 10px;
+  display: flex;
   justify-content: flex-end;
-  gap: 3px;
-  opacity: .9;
-}
-.change-spark i {
-  width: 4px;
-  border-radius: 999px;
-  background: var(--spark-live);
-  opacity: .32;
-}
-.change-spark i:nth-child(1) { height: 5px; }
-.change-spark i:nth-child(2) { height: 9px; }
-.change-spark i:nth-child(3) { height: 6px; }
-.change-spark.level-0 {
   align-items: center;
 }
-.change-spark.level-0 i {
+.mini-diffstat::before {
+  content: "";
+  position: absolute;
+  width: 38px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--diffstat-track);
+}
+.mini-diffstat i {
+  position: relative;
+  z-index: 1;
+  display: block;
+  height: 4px;
+  min-width: 0;
+}
+.mini-diffstat .removed {
+  width: var(--remove-width);
+  border-radius: 999px 0 0 999px;
+  background: var(--diffstat-remove);
+}
+.mini-diffstat .added {
+  width: var(--add-width);
+  border-radius: 0 999px 999px 0;
+  background: var(--diffstat-add);
+}
+.mini-diffstat.no-change i {
   display: none;
 }
-.change-spark.level-0::after {
-  content: "";
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--spark-quiet);
-}
-.change-spark.level-1 i:nth-child(n+2) {
-  background: var(--spark-quiet);
-}
-.change-spark.level-2 i {
-  opacity: .55;
-}
-.change-spark.level-2 i:nth-child(2) { height: 12px; }
-.change-spark.level-3 i {
-  opacity: .85;
-}
-.change-spark.level-3 i:nth-child(1) { height: 9px; }
-.change-spark.level-3 i:nth-child(2) { height: 15px; }
-.change-spark.level-3 i:nth-child(3) { height: 11px; }
 .option:hover { background: var(--control-hover); }
 .option.active {
   background: var(--menu-active);
@@ -663,8 +658,11 @@ a:hover { text-decoration: none; }
     grid-template-columns: minmax(0, 1fr);
     gap: 2px;
   }
-  .change-spark {
-    width: 30px;
+  .mini-diffstat {
+    width: 40px;
+  }
+  .mini-diffstat::before {
+    width: 40px;
   }
 }
 </style>
@@ -871,14 +869,21 @@ function optionHtml(item) {
     return `<button class="option agent-option${active ? ' active' : ''}" type="button" role="option" aria-selected="${active}" data-value="${escapeHtml(value)}">${agentIconHtml(item)}<span><strong>${escapeHtml(primary)}</strong><small>${escapeHtml(item.id)}</small></span></button>`;
   }
   const secondary = item.published_compact;
-  return `<button class="option version-option${active ? ' active' : ''}" type="button" role="option" aria-selected="${active}" data-value="${escapeHtml(value)}"><span class="version-copy"><strong>${escapeHtml(primary)}</strong><small>${escapeHtml(secondary)}</small></span>${changeSparkHtml(item.change)}</button>`;
+  return `<button class="option version-option${active ? ' active' : ''}" type="button" role="option" aria-selected="${active}" data-value="${escapeHtml(value)}"><span class="version-copy"><strong>${escapeHtml(primary)}</strong><small>${escapeHtml(secondary)}</small></span>${miniDiffstatHtml(item.change)}</button>`;
 }
 
-function changeSparkHtml(change) {
-  const level = Math.max(0, Math.min(3, Number(change?.level || 0)));
+function miniDiffstatHtml(change) {
+  const added = Math.max(0, Number(change?.added_lines || 0));
+  const removed = Math.max(0, Number(change?.removed_lines || 0));
   const changed = Number(change?.changed_lines || 0);
+  const total = added + removed;
+  const addPct = total ? (added / total) * 100 : 50;
+  const removePct = total ? (removed / total) * 100 : 50;
+  const scale = total ? Math.max(18, Math.min(100, Math.log10(total + 1) / Math.log10(520) * 100)) : 0;
+  const addWidth = scale * addPct / 100;
+  const removeWidth = scale * removePct / 100;
   const title = changed ? `${changed} changed lines from previous version` : 'No prompt change from previous version';
-  return `<span class="change-spark level-${level}" title="${escapeHtml(title)}" aria-label="${escapeHtml(title)}"><i></i><i></i><i></i></span>`;
+  return `<span class="mini-diffstat${changed ? '' : ' no-change'}" style="--remove-width:${removeWidth.toFixed(2)}%;--add-width:${addWidth.toFixed(2)}%;" title="${escapeHtml(title)}" aria-label="${escapeHtml(title)}"><i class="removed"></i><i class="added"></i></span>`;
 }
 
 function selectedValue() {
