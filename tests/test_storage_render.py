@@ -3,7 +3,7 @@ from pathlib import Path
 
 from phistory.models import AgentSpec, CaptureTarget, VersionInfo
 from phistory.render import render_index
-from phistory.site import render_site
+from phistory.site import _change_summary, render_site
 from phistory.storage import is_captured, write_meta
 
 
@@ -153,9 +153,29 @@ def test_render_site_writes_static_html_manifest(tmp_path: Path):
     assert '"previous_version":"1.0.0"' in text
     assert '"changed_lines":2' in text
     assert '"level":1' in text
-    assert '"scale":32' in text
+    assert '"scale":100' in text
     assert "URLSearchParams" in text
     assert "# Prompt 1.1.0" not in text
     assert "captured_at" not in text
     assert "is_latest" not in text
     assert "published_display" not in text
+    assert "_compared_line_count" not in text
+
+
+def test_change_summary_keeps_repeated_prompt_lines_matchable(tmp_path: Path):
+    old_prompt = tmp_path / "old.md"
+    new_prompt = tmp_path / "new.md"
+    old_lines = ["- shared instruction", "", "common"] * 220
+    new_lines = old_lines.copy()
+    new_lines[len(new_lines) // 2] = "- updated instruction"
+    old_prompt.write_text("\n".join(old_lines), encoding="utf-8")
+    new_prompt.write_text("\n".join(new_lines), encoding="utf-8")
+
+    change = _change_summary(
+        {"version": "1.1.0", "prompt": new_prompt},
+        {"version": "1.0.0", "prompt": old_prompt},
+    )
+
+    assert change["added_lines"] == 1
+    assert change["removed_lines"] == 1
+    assert change["changed_lines"] == 2

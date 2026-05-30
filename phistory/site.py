@@ -1,6 +1,5 @@
 import difflib
 import json
-import statistics
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -17,9 +16,8 @@ AGENT_ICONS = {
 }
 CHANGE_SMALL_MAX_LINES = 12
 CHANGE_MEDIUM_MAX_LINES = 80
-CHANGE_BASELINE_PERCENTILE = 0.95
-CHANGE_BASELINE_MIN_LINES = 20
-CHANGE_BASELINE_PROMPT_RATIO = 0.10
+CHANGE_FULL_SCALE_RATIO = 0.30
+CHANGE_MIN_SCALE = 14
 
 
 def render_site(root: Path, output: Path) -> None:
@@ -83,6 +81,7 @@ def _change_summary(current: dict, previous: dict | None) -> dict:
             "changed_lines": 0,
             "level": 0,
             "line_count": len(new_lines),
+            "_compared_line_count": len(new_lines),
         }
     try:
         old_lines = previous["prompt"].read_text(encoding="utf-8").splitlines()
@@ -94,11 +93,13 @@ def _change_summary(current: dict, previous: dict | None) -> dict:
             "changed_lines": 0,
             "level": 0,
             "line_count": len(new_lines),
+            "_compared_line_count": len(new_lines),
         }
 
     added = 0
     removed = 0
-    for tag, old_start, old_end, new_start, new_end in difflib.SequenceMatcher(a=old_lines, b=new_lines).get_opcodes():
+    matcher = difflib.SequenceMatcher(None, old_lines, new_lines, autojunk=False)
+    for tag, old_start, old_end, new_start, new_end in matcher.get_opcodes():
         if tag == "insert":
             added += new_end - new_start
         elif tag == "delete":
@@ -114,6 +115,7 @@ def _change_summary(current: dict, previous: dict | None) -> dict:
         "changed_lines": changed,
         "level": _change_level(changed),
         "line_count": len(new_lines),
+        "_compared_line_count": max(len(old_lines), len(new_lines)),
     }
 
 
@@ -128,26 +130,17 @@ def _change_level(changed_lines: int) -> int:
 
 
 def _add_relative_change_scale(versions: list[dict]) -> None:
-    changed_values = sorted(item["change"]["changed_lines"] for item in versions if item["change"]["changed_lines"] > 0)
-    line_counts = [item["change"]["line_count"] for item in versions if item["change"]["line_count"] > 0]
-    prompt_baseline = round(statistics.median(line_counts) * CHANGE_BASELINE_PROMPT_RATIO) if line_counts else 0
-    baseline = max(_percentile(changed_values, CHANGE_BASELINE_PERCENTILE), prompt_baseline, CHANGE_BASELINE_MIN_LINES)
     for item in versions:
-        changed_lines = item["change"]["changed_lines"]
-        item["change"]["scale"] = _relative_change_scale(changed_lines, baseline)
+        change = item["change"]
+        compared_line_count = change.pop("_compared_line_count")
+        change["scale"] = _relative_change_scale(change["changed_lines"], compared_line_count)
 
 
-def _percentile(values: list[int], percentile: float) -> int:
-    if not values:
+def _relative_change_scale(changed_lines: int, compared_line_count: int) -> int:
+    if changed_lines <= 0 or compared_line_count <= 0:
         return 0
-    index = round((len(values) - 1) * percentile)
-    return values[max(0, min(len(values) - 1, index))]
-
-
-def _relative_change_scale(changed_lines: int, baseline: int) -> int:
-    if changed_lines <= 0 or baseline <= 0:
-        return 0
-    return round(max(14, min(100, (changed_lines / baseline) ** 0.5 * 100)))
+    ratio = changed_lines / compared_line_count
+    return round(max(CHANGE_MIN_SCALE, min(100, ratio / CHANGE_FULL_SCALE_RATIO * 100)))
 
 
 def _compact_date(value: str) -> str:
