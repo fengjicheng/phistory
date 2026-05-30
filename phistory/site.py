@@ -1,3 +1,4 @@
+import difflib
 import json
 from datetime import datetime, timezone
 from pathlib import Path
@@ -13,6 +14,8 @@ AGENT_ICONS = {
     "opencode": "docs/agent-icons/opencode.png",
     "pi": "docs/agent-icons/pi.png",
 }
+CHANGE_SMALL_MAX_LINES = 12
+CHANGE_MEDIUM_MAX_LINES = 80
 
 
 def render_site(root: Path, output: Path) -> None:
@@ -20,14 +23,15 @@ def render_site(root: Path, output: Path) -> None:
 
 
 def _build_manifest(root: Path) -> dict:
-    rows = [_site_row(row) for row in read_capture_rows(root)]
+    rows = read_capture_rows(root)
     agents = []
     for agent_id in sorted({row["agent_id"] for row in rows}):
-        versions = sorted(
+        agent_rows = sorted(
             [row for row in rows if row["agent_id"] == agent_id],
             key=lambda row: _version_key(row["version"]),
             reverse=True,
         )
+        versions = _site_versions(agent_rows)
         latest = versions[0] if versions else None
         agents.append(
             {
@@ -41,6 +45,16 @@ def _build_manifest(root: Path) -> dict:
     return {"agents": agents, "count": len(rows)}
 
 
+def _site_versions(rows: list[dict]) -> list[dict]:
+    versions = []
+    for index, row in enumerate(rows):
+        previous = rows[index + 1] if index + 1 < len(rows) else None
+        item = _site_row(row)
+        item["change"] = _change_summary(row, previous)
+        versions.append(item)
+    return versions
+
+
 def _site_row(row: dict) -> dict:
     return {
         "agent_id": row["agent_id"],
@@ -49,6 +63,51 @@ def _site_row(row: dict) -> dict:
         "published_compact": _compact_date(row["published_at"]),
         "prompt": row["prompt"].as_posix(),
     }
+
+
+def _change_summary(current: dict, previous: dict | None) -> dict:
+    if previous is None:
+        return {"previous_version": None, "added_lines": 0, "removed_lines": 0, "changed_lines": 0, "level": 0}
+    try:
+        old_lines = previous["prompt"].read_text(encoding="utf-8").splitlines()
+        new_lines = current["prompt"].read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return {
+            "previous_version": previous["version"],
+            "added_lines": 0,
+            "removed_lines": 0,
+            "changed_lines": 0,
+            "level": 0,
+        }
+
+    added = 0
+    removed = 0
+    for tag, old_start, old_end, new_start, new_end in difflib.SequenceMatcher(a=old_lines, b=new_lines).get_opcodes():
+        if tag == "insert":
+            added += new_end - new_start
+        elif tag == "delete":
+            removed += old_end - old_start
+        elif tag == "replace":
+            removed += old_end - old_start
+            added += new_end - new_start
+    changed = added + removed
+    return {
+        "previous_version": previous["version"],
+        "added_lines": added,
+        "removed_lines": removed,
+        "changed_lines": changed,
+        "level": _change_level(changed),
+    }
+
+
+def _change_level(changed_lines: int) -> int:
+    if changed_lines == 0:
+        return 0
+    if changed_lines <= CHANGE_SMALL_MAX_LINES:
+        return 1
+    if changed_lines <= CHANGE_MEDIUM_MAX_LINES:
+        return 2
+    return 3
 
 
 def _compact_date(value: str) -> str:
@@ -126,6 +185,8 @@ _HTML = r"""<!doctype html>
   --menu-active: rgba(255, 255, 255, .11);
   --focus-line: rgba(255, 255, 255, .34);
   --scrollbar: rgba(255, 255, 255, .22);
+  --spark-quiet: rgba(255, 255, 255, .26);
+  --spark-live: #7ab7e6;
 }
 :root[data-theme="light"] {
   color-scheme: light;
@@ -142,6 +203,8 @@ _HTML = r"""<!doctype html>
   --menu-active: rgba(0, 0, 0, .07);
   --focus-line: rgba(0, 0, 0, .30);
   --scrollbar: rgba(0, 0, 0, .22);
+  --spark-quiet: rgba(0, 0, 0, .28);
+  --spark-live: #0a66b2;
 }
 * { box-sizing: border-box; }
 html, body { height: 100%; }
@@ -194,7 +257,7 @@ a:hover { text-decoration: none; }
 .compare {
   min-width: 0;
   display: grid;
-  grid-template-columns: 176px 24px 176px;
+  grid-template-columns: 176px 22px 204px;
   gap: 0;
   align-items: center;
   justify-content: center;
@@ -266,7 +329,7 @@ a:hover { text-decoration: none; }
   background: var(--control-hover);
 }
 .version-control {
-  width: 176px;
+  width: 100%;
 }
 .control:focus-visible,
 .icon-button:focus-visible,
@@ -293,6 +356,25 @@ a:hover { text-decoration: none; }
   display: inline-flex;
   align-items: center;
   height: 100%;
+}
+.version-sub {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  color: var(--muted);
+  line-height: 1;
+}
+.version-sub small {
+  height: auto;
+}
+.latest-mark {
+  color: var(--accent);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 650;
+  letter-spacing: 0;
 }
 .arrow {
   color: var(--muted);
@@ -369,8 +451,8 @@ a:hover { text-decoration: none; }
 .popover.open { display: block; }
 .options {
   overflow: auto;
-  padding: 4px;
-  max-height: var(--popover-max-height);
+  padding: 4px 4px 12px;
+  max-height: calc(var(--popover-max-height) - 2px);
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar) transparent;
   overscroll-behavior: contain;
@@ -403,6 +485,67 @@ a:hover { text-decoration: none; }
   text-align: left;
   cursor: pointer;
 }
+.version-option {
+  min-height: 44px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  padding: 7px 8px;
+}
+.version-copy {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, auto) auto;
+  gap: 12px;
+  align-items: baseline;
+}
+.version-copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.change-spark {
+  width: 28px;
+  height: 16px;
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 3px;
+  opacity: .9;
+}
+.change-spark i {
+  width: 4px;
+  border-radius: 999px;
+  background: var(--spark-live);
+  opacity: .32;
+}
+.change-spark i:nth-child(1) { height: 5px; }
+.change-spark i:nth-child(2) { height: 9px; }
+.change-spark i:nth-child(3) { height: 6px; }
+.change-spark.level-0 {
+  align-items: center;
+}
+.change-spark.level-0 i {
+  display: none;
+}
+.change-spark.level-0::after {
+  content: "";
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--spark-quiet);
+}
+.change-spark.level-1 i:nth-child(n+2) {
+  background: var(--spark-quiet);
+}
+.change-spark.level-2 i {
+  opacity: .55;
+}
+.change-spark.level-2 i:nth-child(2) { height: 12px; }
+.change-spark.level-3 i {
+  opacity: .85;
+}
+.change-spark.level-3 i:nth-child(1) { height: 9px; }
+.change-spark.level-3 i:nth-child(2) { height: 15px; }
+.change-spark.level-3 i:nth-child(3) { height: 11px; }
 .option:hover { background: var(--control-hover); }
 .option.active {
   background: var(--menu-active);
@@ -440,19 +583,19 @@ a:hover { text-decoration: none; }
   .topbar {
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: stretch;
-    gap: 9px 10px;
-    padding: 10px 12px 9px;
+    gap: 7px 10px;
+    padding: 8px 12px;
   }
   .left-tools {
     gap: 10px;
   }
   .brand h1 {
-    font-size: 17px;
+    font-size: 16px;
   }
   .agent-control {
     min-width: 0;
     max-width: min(210px, 56vw);
-    height: 34px;
+    height: 32px;
     padding-inline: 10px;
   }
   .agent-icon {
@@ -471,18 +614,33 @@ a:hover { text-decoration: none; }
   }
   .version-control {
     width: 100%;
-    height: 40px;
-    padding: 0 10px;
+    height: 42px;
+    padding: 6px 10px;
     border: 1px solid var(--line);
     border-radius: 8px;
     background: var(--control-bg);
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 3px;
+  }
+  .version-control strong,
+  .version-control small,
+  .version-sub {
+    height: auto;
+    line-height: 1;
+  }
+  .version-sub {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 7px;
   }
   .version-control small {
     font-size: 11px;
   }
   .arrow {
     display: inline-flex;
-    height: 40px;
+    height: 42px;
     font-size: 13px;
   }
   .actions { grid-column: 2; grid-row: 1; }
@@ -496,6 +654,17 @@ a:hover { text-decoration: none; }
     min-height: 42px;
     padding: 9px 10px;
     border-radius: 8px;
+  }
+  .version-option {
+    min-height: 50px;
+    padding: 8px 10px;
+  }
+  .version-copy {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+  .change-spark {
+    width: 30px;
   }
 }
 </style>
@@ -546,6 +715,8 @@ const state = {
   agent: manifest.agents[0]?.id || '',
   from: '',
   to: '',
+  followLatest: true,
+  normalizeQuery: false,
   theme: localStorage.getItem('phistory-theme') || 'dark',
   picker: null,
   cache: new Map(),
@@ -561,6 +732,7 @@ function boot() {
     return;
   }
   readQuery();
+  if (state.normalizeQuery) writeQuery();
   applyTheme();
   bindEvents();
   renderControls();
@@ -574,12 +746,22 @@ function readQuery() {
   const agent = currentAgent();
   const to = params.get('to');
   const from = params.get('from');
+  const hasPinnedVersions = params.has('from') || params.has('to');
+  state.followLatest = !hasPinnedVersions && params.get('range') === 'latest';
+  state.normalizeQuery = hasPinnedVersions && params.has('range');
+  if (!hasPinnedVersions && !params.has('range')) state.followLatest = true;
+  if (state.followLatest) {
+    useLatestRange(agent);
+    return;
+  }
   state.to = hasVersion(agent, to) ? to : agent.latest.version;
   state.from = hasVersion(agent, from) ? from : previousVersion(agent, state.to).version;
 }
 
 function writeQuery() {
-  const params = new URLSearchParams({ agent: state.agent, from: state.from, to: state.to });
+  const params = state.followLatest
+    ? new URLSearchParams({ agent: state.agent, range: 'latest' })
+    : new URLSearchParams({ agent: state.agent, from: state.from, to: state.to });
   history.replaceState(null, '', `${location.pathname}?${params.toString()}`);
 }
 
@@ -607,7 +789,7 @@ function renderControls() {
   const to = versionInfo(state.to);
   els.agent.innerHTML = `${agentIconHtml(agent)}<strong>${escapeHtml(agent.name)}</strong>`;
   els.from.innerHTML = versionLabel(from);
-  els.to.innerHTML = versionLabel(to);
+  els.to.innerHTML = versionLabel(to, state.followLatest);
 }
 
 function agentIconHtml(agent) {
@@ -615,8 +797,9 @@ function agentIconHtml(agent) {
   return `<img class="agent-icon" src="${escapeHtml(agent.icon)}" alt="" loading="lazy" decoding="async">`;
 }
 
-function versionLabel(item) {
-  return `<strong>${escapeHtml(item.version)}</strong><small>${escapeHtml(item.published_compact)}</small>`;
+function versionLabel(item, latest = false) {
+  const marker = latest ? '<em class="latest-mark">Latest</em>' : '';
+  return `<strong>${escapeHtml(item.version)}</strong><span class="version-sub"><small>${escapeHtml(item.published_compact)}</small>${marker}</span>`;
 }
 
 function togglePicker(kind, anchor) {
@@ -653,7 +836,7 @@ function positionPopover(anchor) {
   const minWidth = state.picker === 'agent' ? 260 : rect.width;
   const width = isMobile && state.picker !== 'agent'
     ? innerWidth - margin * 2
-    : Math.min(Math.max(rect.width, minWidth), innerWidth - margin * 2);
+    : Math.min(Math.max(rect.width, minWidth, state.picker === 'agent' ? 0 : 250), innerWidth - margin * 2);
   const left = Math.max(margin, Math.min(rect.left, innerWidth - width - margin));
   let top = rect.bottom + (isMobile ? 8 : 5);
   let maxHeight = Math.min(isMobile ? 460 : 420, innerHeight - top - margin);
@@ -688,7 +871,14 @@ function optionHtml(item) {
     return `<button class="option agent-option${active ? ' active' : ''}" type="button" role="option" aria-selected="${active}" data-value="${escapeHtml(value)}">${agentIconHtml(item)}<span><strong>${escapeHtml(primary)}</strong><small>${escapeHtml(item.id)}</small></span></button>`;
   }
   const secondary = item.published_compact;
-  return `<button class="option${active ? ' active' : ''}" type="button" role="option" aria-selected="${active}" data-value="${escapeHtml(value)}"><span><strong>${escapeHtml(primary)}</strong></span><small>${escapeHtml(secondary)}</small></button>`;
+  return `<button class="option version-option${active ? ' active' : ''}" type="button" role="option" aria-selected="${active}" data-value="${escapeHtml(value)}"><span class="version-copy"><strong>${escapeHtml(primary)}</strong><small>${escapeHtml(secondary)}</small></span>${changeSparkHtml(item.change)}</button>`;
+}
+
+function changeSparkHtml(change) {
+  const level = Math.max(0, Math.min(3, Number(change?.level || 0)));
+  const changed = Number(change?.changed_lines || 0);
+  const title = changed ? `${changed} changed lines from previous version` : 'No prompt change from previous version';
+  return `<span class="change-spark level-${level}" title="${escapeHtml(title)}" aria-label="${escapeHtml(title)}"><i></i><i></i><i></i></span>`;
 }
 
 function selectedValue() {
@@ -701,11 +891,13 @@ function selectOption(value) {
   if (state.picker === 'agent') {
     state.agent = value;
     const agent = currentAgent();
-    state.to = agent.latest.version;
-    state.from = previousVersion(agent, state.to).version;
+    state.followLatest = true;
+    useLatestRange(agent);
   } else if (state.picker === 'from') {
+    state.followLatest = false;
     state.from = value;
   } else if (state.picker === 'to') {
+    state.followLatest = false;
     state.to = value;
   }
   closePicker();
@@ -842,6 +1034,11 @@ function versionInfo(version) {
 function previousVersion(agent, version) {
   const index = agent.versions.findIndex(item => item.version === version);
   return agent.versions[index + 1] || agent.versions[index] || agent.latest;
+}
+
+function useLatestRange(agent) {
+  state.to = agent.latest.version;
+  state.from = previousVersion(agent, state.to).version;
 }
 
 function hasVersion(agent, version) {
