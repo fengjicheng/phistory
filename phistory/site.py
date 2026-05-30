@@ -792,7 +792,7 @@ function renderControls() {
   const to = versionInfo(state.to);
   els.agent.innerHTML = `${agentIconHtml(agent)}<strong>${escapeHtml(agent.name)}</strong>`;
   els.from.innerHTML = versionLabel(from);
-  els.to.innerHTML = versionLabel(to, state.followLatest);
+  els.to.innerHTML = versionLabel(to, isLatestVersion(agent, to.version));
 }
 
 function agentIconHtml(agent) {
@@ -1074,6 +1074,10 @@ function useLatestRange(agent) {
 
 function hasVersion(agent, version) {
   return Boolean(version && agent.versions.some(item => item.version === version));
+}
+
+function isLatestVersion(agent, version) {
+  return version === agent.latest.version;
 }
 
 function showError(error) {
