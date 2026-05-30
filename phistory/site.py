@@ -505,40 +505,42 @@ a:hover { text-decoration: none; }
   text-overflow: ellipsis;
 }
 .mini-diffstat {
-  --add-width: 0%;
-  --remove-width: 0%;
-  width: 38px;
-  height: 10px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-}
-.mini-diffstat::before {
-  content: "";
-  position: absolute;
-  width: 38px;
-  height: 2px;
+  --fill-width: 0%;
+  --added-part: 50%;
+  --removed-part: 50%;
+  width: 42px;
+  height: 7px;
   border-radius: 999px;
   background: var(--diffstat-track);
+  display: flex;
+  justify-content: flex-end;
+  overflow: hidden;
 }
-.mini-diffstat i {
-  position: relative;
-  z-index: 1;
-  display: block;
-  height: 4px;
+.diffstat-fill {
+  width: var(--fill-width);
+  height: 100%;
+  display: flex;
+  border-radius: inherit;
+  overflow: hidden;
   min-width: 0;
 }
+.mini-diffstat i {
+  display: block;
+  height: 100%;
+}
 .mini-diffstat .removed {
-  width: var(--remove-width);
-  border-radius: 999px 0 0 999px;
+  width: var(--removed-part);
   background: var(--diffstat-remove);
 }
 .mini-diffstat .added {
-  width: var(--add-width);
-  border-radius: 0 999px 999px 0;
+  width: var(--added-part);
   background: var(--diffstat-add);
 }
-.mini-diffstat.no-change i {
+.mini-diffstat.no-change {
+  width: 28px;
+  height: 3px;
+}
+.mini-diffstat.no-change .diffstat-fill {
   display: none;
 }
 .option:hover { background: var(--control-hover); }
@@ -659,10 +661,12 @@ a:hover { text-decoration: none; }
     gap: 2px;
   }
   .mini-diffstat {
-    width: 40px;
+    width: 46px;
+    height: 8px;
   }
-  .mini-diffstat::before {
-    width: 40px;
+  .mini-diffstat.no-change {
+    width: 32px;
+    height: 3px;
   }
 }
 </style>
@@ -880,10 +884,8 @@ function miniDiffstatHtml(change) {
   const addPct = total ? (added / total) * 100 : 50;
   const removePct = total ? (removed / total) * 100 : 50;
   const scale = total ? Math.max(18, Math.min(100, Math.log10(total + 1) / Math.log10(520) * 100)) : 0;
-  const addWidth = scale * addPct / 100;
-  const removeWidth = scale * removePct / 100;
   const title = changed ? `${changed} changed lines from previous version` : 'No prompt change from previous version';
-  return `<span class="mini-diffstat${changed ? '' : ' no-change'}" style="--remove-width:${removeWidth.toFixed(2)}%;--add-width:${addWidth.toFixed(2)}%;" title="${escapeHtml(title)}" aria-label="${escapeHtml(title)}"><i class="removed"></i><i class="added"></i></span>`;
+  return `<span class="mini-diffstat${changed ? '' : ' no-change'}" style="--fill-width:${scale.toFixed(2)}%;--removed-part:${removePct.toFixed(2)}%;--added-part:${addPct.toFixed(2)}%;" title="${escapeHtml(title)}" aria-label="${escapeHtml(title)}"><span class="diffstat-fill"><i class="removed"></i><i class="added"></i></span></span>`;
 }
 
 function selectedValue() {
