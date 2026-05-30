@@ -758,6 +758,7 @@ function readQuery() {
   }
   state.to = hasVersion(agent, to) ? to : agent.latest.version;
   state.from = hasVersion(agent, from) ? from : previousVersion(agent, state.to).version;
+  state.normalizeQuery = normalizeVersionRange(agent, 'to') || state.normalizeQuery;
 }
 
 function writeQuery() {
@@ -903,9 +904,11 @@ function selectOption(value) {
   } else if (state.picker === 'from') {
     state.followLatest = false;
     state.from = value;
+    normalizeVersionRange(currentAgent(), 'from');
   } else if (state.picker === 'to') {
     state.followLatest = false;
     state.to = value;
+    normalizeVersionRange(currentAgent(), 'to');
   }
   closePicker();
   refresh();
@@ -1041,6 +1044,27 @@ function versionInfo(version) {
 function previousVersion(agent, version) {
   const index = agent.versions.findIndex(item => item.version === version);
   return agent.versions[index + 1] || agent.versions[index] || agent.latest;
+}
+
+function nextVersion(agent, version) {
+  const index = agent.versions.findIndex(item => item.version === version);
+  return agent.versions[index - 1] || agent.versions[index] || agent.latest;
+}
+
+function versionIndex(agent, version) {
+  return agent.versions.findIndex(item => item.version === version);
+}
+
+function normalizeVersionRange(agent, anchor) {
+  const fromIndex = versionIndex(agent, state.from);
+  const toIndex = versionIndex(agent, state.to);
+  if (fromIndex < 0 || toIndex < 0 || fromIndex > toIndex) return false;
+  if (anchor === 'from') {
+    state.to = nextVersion(agent, state.from).version;
+  } else {
+    state.from = previousVersion(agent, state.to).version;
+  }
+  return true;
 }
 
 function useLatestRange(agent) {
