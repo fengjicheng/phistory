@@ -16,6 +16,7 @@ Full generated index of archived prompt snapshots. The short project overview li
 | Pi | `0.74.2` | 2026-05-21 22:22 UTC | 2026-05-23 07:35 UTC | [pi 0.74.2, published 2026-05-21 22:22 UTC](../captures/pi/0.74.2/prompt.md) | [trace.jsonl](../captures/pi/0.74.2/trace.jsonl) |
 | Pi | `0.74.1` | 2026-05-16 23:34 UTC | 2026-05-23 07:35 UTC | [pi 0.74.1, published 2026-05-16 23:34 UTC](../captures/pi/0.74.1/prompt.md) | [trace.jsonl](../captures/pi/0.74.1/trace.jsonl) |
 | Pi | `0.74.0` | 2026-05-07 15:15 UTC | 2026-05-23 07:35 UTC | [pi 0.74.0, published 2026-05-07 15:15 UTC](../captures/pi/0.74.0/prompt.md) | [trace.jsonl](../captures/pi/0.74.0/trace.jsonl) |
+| opencode | `1.15.13` | 2026-05-30 23:39 UTC | 2026-05-31 00:17 UTC | [opencode 1.15.13, published 2026-05-30 23:39 UTC](../captures/opencode/1.15.13/prompt.md) | [trace.jsonl](../captures/opencode/1.15.13/trace.jsonl) |
 | opencode | `1.15.12` | 2026-05-28 19:32 UTC | 2026-05-28 19:46 UTC | [opencode 1.15.12, published 2026-05-28 19:32 UTC](../captures/opencode/1.15.12/prompt.md) | [trace.jsonl](../captures/opencode/1.15.12/trace.jsonl) |
 | opencode | `1.15.11` | 2026-05-27 03:59 UTC | 2026-05-27 04:49 UTC | [opencode 1.15.11, published 2026-05-27 03:59 UTC](../captures/opencode/1.15.11/prompt.md) | [trace.jsonl](../captures/opencode/1.15.11/trace.jsonl) |
 | opencode | `1.15.10` | 2026-05-23 01:02 UTC | 2026-05-23 07:30 UTC | [opencode 1.15.10, published 2026-05-23 01:02 UTC](../captures/opencode/1.15.10/prompt.md) | [trace.jsonl](../captures/opencode/1.15.10/trace.jsonl) |

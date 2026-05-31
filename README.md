@@ -64,7 +64,7 @@ The generated indexes are:
 
 ## Capture Status
 
-Last capture update: 2026-05-30 21:16 UTC
+Last capture update: 2026-05-31 00:17 UTC
 
 | Agent | Latest | Captures | Last Captured |
 | --- | --- | ---: | --- |
@@ -73,5 +73,5 @@ Last capture update: 2026-05-30 21:16 UTC
 | Hermes Agent | [v2026.5.29.2 - 2026-05-29](captures/hermes/v2026.5.29.2/prompt.md) | 14 | 2026-05-29 16:55 UTC |
 | Kimi CLI | [1.46.0 - 2026-05-29](captures/kimi/1.46.0/prompt.md) | 18 | 2026-05-29 08:53 UTC |
 | OpenClaw | [2026.5.28 - 2026-05-30](captures/openclaw/2026.5.28/prompt.md) | 60 | 2026-05-30 21:16 UTC |
-| opencode | [1.15.12 - 2026-05-28](captures/opencode/1.15.12/prompt.md) | 63 | 2026-05-28 19:46 UTC |
+| opencode | [1.15.13 - 2026-05-30](captures/opencode/1.15.13/prompt.md) | 64 | 2026-05-31 00:17 UTC |
 | Pi | [0.78.0 - 2026-05-29](captures/pi/0.78.0/prompt.md) | 12 | 2026-05-30 04:18 UTC |
