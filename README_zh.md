@@ -64,11 +64,11 @@ uv run phistory render-site
 
 ## 抓取状态
 
-最近抓取更新：2026-06-02 06:58 UTC
+最近抓取更新：2026-06-02 23:10 UTC
 
 | Agent | 最新版本 | 快照数 | 最近抓取 |
 | --- | --- | ---: | --- |
-| Claude Code | [2.1.160 - 2026-06-01](captures/claude-code/2.1.160/prompt.md) | 328 | 2026-06-02 06:58 UTC |
+| Claude Code | [2.1.161 - 2026-06-02](captures/claude-code/2.1.161/prompt.md) | 329 | 2026-06-02 23:10 UTC |
 | Codex CLI | [0.136.0 - 2026-06-01](captures/codex/0.136.0/prompt.md) | 51 | 2026-06-01 21:06 UTC |
 | Hermes Agent | [v2026.5.29.2 - 2026-05-29](captures/hermes/v2026.5.29.2/prompt.md) | 14 | 2026-05-29 16:55 UTC |
 | Kimi CLI | [1.46.0 - 2026-05-29](captures/kimi/1.46.0/prompt.md) | 18 | 2026-05-29 08:53 UTC |
