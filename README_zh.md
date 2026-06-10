@@ -66,7 +66,7 @@ uv run phistory render-site
 
 ## 抓取状态
 
-最近抓取更新：2026-06-10 06:43 UTC
+最近抓取更新：2026-06-10 14:30 UTC
 
 | Agent | 最新版本 | 快照数 | 最近抓取 |
 | --- | --- | ---: | --- |
@@ -75,5 +75,5 @@ uv run phistory render-site
 | Hermes Agent | [v2026.6.5 - 2026-06-06](captures/hermes/v2026.6.5/prompt.md) | 15 | 2026-06-06 05:06 UTC |
 | Kimi CLI | [1.47.0 - 2026-06-05](captures/kimi/1.47.0/prompt.md) | 19 | 2026-06-05 13:28 UTC |
 | OpenClaw | [2026.6.5 - 2026-06-09](captures/openclaw/2026.6.5/prompt.md) | 62 | 2026-06-09 18:22 UTC |
-| opencode | [1.17.0 - 2026-06-10](captures/opencode/1.17.0/prompt.md) | 67 | 2026-06-10 06:43 UTC |
+| opencode | [1.17.1 - 2026-06-10](captures/opencode/1.17.1/prompt.md) | 68 | 2026-06-10 14:30 UTC |
 | Pi | [0.79.1 - 2026-06-09](captures/pi/0.79.1/prompt.md) | 15 | 2026-06-09 22:50 UTC |
