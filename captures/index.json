@@ -1,15 +1,15 @@
 {
   "description": "Phistory automatically archives versioned system prompt snapshots from agent CLIs like Claude Code, Codex, OpenClaw, Hermes, Kimi, opencode, and Pi.",
   "site": "https://phistory.cc/",
-  "updated_at": "2026-06-12T15:51:07.615849Z",
+  "updated_at": "2026-06-13T00:04:56.056752Z",
   "agents": [
     {
       "agent_id": "claude-code",
       "agent": "Claude Code",
-      "latest_version": "2.1.175",
-      "latest_published_at": "2026-06-12T02:10:22.132Z",
-      "latest_captured_at": "2026-06-12T05:19:41.837140+00:00",
-      "captures": 339
+      "latest_version": "2.1.176",
+      "latest_published_at": "2026-06-12T19:45:41.757Z",
+      "latest_captured_at": "2026-06-13T00:04:44.180505+00:00",
+      "captures": 340
     },
     {
       "agent_id": "codex",
@@ -54,13 +54,23 @@
     {
       "agent_id": "pi",
       "agent": "Pi",
-      "latest_version": "0.79.1",
-      "latest_published_at": "2026-06-09T21:25:46.031Z",
-      "latest_captured_at": "2026-06-09T22:50:20.883361+00:00",
-      "captures": 15
+      "latest_version": "0.79.2",
+      "latest_published_at": "2026-06-12T22:29:49.584Z",
+      "latest_captured_at": "2026-06-13T00:04:56.056752+00:00",
+      "captures": 16
     }
   ],
   "captures": [
+    {
+      "agent_id": "pi",
+      "agent": "Pi",
+      "version": "0.79.2",
+      "published_at": "2026-06-12T22:29:49.584Z",
+      "captured_at": "2026-06-13T00:04:56.056752+00:00",
+      "prompt": "captures/pi/0.79.2/prompt.md",
+      "trace": "captures/pi/0.79.2/trace.jsonl",
+      "meta": "captures/pi/0.79.2/meta.json"
+    },
     {
       "agent_id": "pi",
       "agent": "Pi",
@@ -2420,6 +2430,16 @@
       "prompt": "captures/codex/0.80.0/prompt.md",
       "trace": "captures/codex/0.80.0/trace.jsonl",
       "meta": "captures/codex/0.80.0/meta.json"
+    },
+    {
+      "agent_id": "claude-code",
+      "agent": "Claude Code",
+      "version": "2.1.176",
+      "published_at": "2026-06-12T19:45:41.757Z",
+      "captured_at": "2026-06-13T00:04:44.180505+00:00",
+      "prompt": "captures/claude-code/2.1.176/prompt.md",
+      "trace": "captures/claude-code/2.1.176/trace.jsonl",
+      "meta": "captures/claude-code/2.1.176/meta.json"
     },
     {
       "agent_id": "claude-code",
