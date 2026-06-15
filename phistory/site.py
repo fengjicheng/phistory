@@ -201,6 +201,17 @@ _HTML = r"""<!doctype html>
 <link rel="canonical" href="https://phistory.cc/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230f1115'/%3E%3Cpath d='M8 10h16M8 16h10M8 22h14' stroke='%237cc7ff' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
 <title>Phistory - Agent CLI System Prompt Diff History</title>
+<script>
+(() => {
+  let theme = 'dark';
+  try {
+    const stored = localStorage.getItem('phistory-theme');
+    if (stored === 'dark' || stored === 'light') theme = stored;
+  } catch {}
+  document.documentElement.dataset.theme = theme;
+  document.documentElement.style.colorScheme = theme;
+})();
+</script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -1213,6 +1224,13 @@ const els = {
   popover: document.getElementById('popover'),
   options: document.getElementById('options')
 };
+function storedTheme() {
+  try {
+    const theme = localStorage.getItem('phistory-theme');
+    if (theme === 'dark' || theme === 'light') return theme;
+  } catch {}
+  return 'dark';
+}
 const state = {
   view: 'diff',
   agent: manifest.agents[0]?.id || '',
@@ -1220,7 +1238,7 @@ const state = {
   to: '',
   followLatest: true,
   normalizeQuery: false,
-  theme: localStorage.getItem('phistory-theme') || 'dark',
+  theme: storedTheme(),
   picker: null,
   cache: new Map(),
   traceCache: new Map(),
@@ -2073,6 +2091,7 @@ function toggleTheme() {
 
 function applyTheme() {
   document.documentElement.dataset.theme = state.theme;
+  document.documentElement.style.colorScheme = state.theme;
   els.theme.innerHTML = '<span class="theme-mark" aria-hidden="true"></span>';
   els.theme.setAttribute('aria-label', state.theme === 'dark' ? 'Use light theme' : 'Use dark theme');
 }

@@ -2,32 +2,49 @@
 
 [中文](README_zh.md)
 
-Phistory automatically archives versioned system prompt snapshots from agent CLIs like Claude Code, Codex, OpenClaw, Hermes, Kimi, opencode, and Pi.
+Phistory tracks how system prompts change across popular coding-agent CLIs like Claude Code, Codex, Kimi, opencode, OpenClaw, Hermes, and Pi.
 
-It installs a specific CLI release, runs it once through [`claude-tap`](https://github.com/liaohch3/claude-tap), captures the prompt-bearing HTTP request, and writes a comparison-friendly Markdown snapshot.
+Open the web viewer to compare prompt snapshots across versions and see how agent design changes through prompts, tools, policies, and runtime instructions.
 
-Phistory uses the PyPI release `claude-tap >= 0.1.102`, where capture-only prompt snapshot export is available upstream.
+**Start here:** [phistory.cc](https://phistory.cc/)
 
-GitHub Actions checks supported CLI releases every hour and commits new prompt snapshots when they appear.
-
-[Open the prompt diff viewer](https://phistory.cc/)
+Latest automated capture: opencode `1.17.7` at 2026-06-14 20:10 UTC; checks run hourly.
 
 ![Phistory prompt diff viewer](docs/screenshot.png)
 
-## Usage
+## Why Use It
+
+- Follow how Anthropic, OpenAI, and other agent builders iterate on system prompts over time.
+- See when new tools, permission checks, model defaults, and user-confirmation rules are added.
+- Compare how different CLIs structure agent behavior, tool use, and developer-facing constraints.
+- Cite stable prompt snapshots in posts, research notes, audits, or debugging reports.
+
+## How It Works
+
+For each supported release, Phistory installs the exact CLI package, runs it once through [`claude-tap`](https://github.com/liaohch3/claude-tap), captures the prompt-bearing HTTP request without calling the real model provider, and stores the result under `captures/<agent>/<version>/` with `prompt.md`, `trace.jsonl`, and `meta.json`.
+
+GitHub Actions checks supported CLI releases every hour and commits new snapshots when they appear.
+
+## Local Development
+
+Use the hosted viewer at [phistory.cc](https://phistory.cc/). These commands are for local development, capture reproduction, historical backfills, and regenerating generated files.
 
 ```bash
+# Install the locked development environment.
+uv sync --all-groups
+
+# Capture the latest supported CLI releases.
 uv run phistory capture --latest --agents claude-code,codex,openclaw,hermes,kimi,opencode,pi
+
+# Capture a historical version range for one agent.
 uv run phistory backfill claude-code --from 2.1.113 --to latest
+
+# Regenerate README.md, README_zh.md, docs/captures.md, and captures/index.json.
 uv run phistory render-index
+
+# Regenerate the static web viewer at index.html.
 uv run phistory render-site
 ```
-
-## Web UI
-
-`index.html` is a static prompt viewer with version navigation and Monaco-powered diffs. GitHub Pages deploys it directly from this repository.
-
-Use the viewer for human comparison. Use [`captures/index.json`](captures/index.json) and [`docs/captures.md`](docs/captures.md) when you need an index of every archived snapshot.
 
 ## Supported Agents
 
@@ -38,31 +55,6 @@ Use the viewer for human comparison. Use [`captures/index.json`](captures/index.
 - Kimi CLI (`MoonshotAI/kimi-cli`)
 - opencode (`opencode-ai`)
 - Pi (`@earendil-works/pi-coding-agent`)
-
-## Capture Format
-
-Each capture is stored under `captures/<agent>/<version>/`:
-
-- `prompt.md`: normalized prompt snapshot for reading and diffing
-- `trace.jsonl`: raw captured HTTP trace, kept unnormalized as evidence
-- `meta.json`: package, version, command, and capture metadata
-
-The generated indexes are:
-
-- [`captures/index.json`](captures/index.json): compact machine-readable capture index
-- [`docs/captures.md`](docs/captures.md): full human-readable capture table
-
-## For AI Agents
-
-- Use `README.md` for the project overview and current capture status.
-- Use `captures/index.json` to discover available agents, versions, prompt paths, and trace paths.
-- Use `captures/<agent>/<version>/prompt.md` when you need a normalized prompt snapshot.
-- Use `captures/<agent>/<version>/trace.jsonl` only when you need raw HTTP capture evidence.
-- Treat `index.html` as a human-facing viewer; it is not the canonical machine-readable index.
-
-## Links
-
-- [linux.do](https://linux.do)
 
 ## Capture Status
 
@@ -77,3 +69,7 @@ Last capture update: 2026-06-14 20:10 UTC
 | OpenClaw | [2026.6.6 - 2026-06-12](captures/openclaw/2026.6.6/prompt.md) | 63 | 2026-06-12 15:51 UTC |
 | opencode | [1.17.7 - 2026-06-14](captures/opencode/1.17.7/prompt.md) | 73 | 2026-06-14 20:10 UTC |
 | Pi | [0.79.3 - 2026-06-13](captures/pi/0.79.3/prompt.md) | 17 | 2026-06-13 09:45 UTC |
+
+## Project Trend
+
+![Phistory star history](https://api.star-history.com/svg?repos=WEIFENG2333/phistory&type=Date)

@@ -57,81 +57,87 @@ def read_capture_rows(root: Path) -> list[dict[str, Any]]:
 def _readme_markdown(rows: list[dict[str, Any]], base: Path) -> str:
     status_rows = _agent_status_rows(rows)
     last_update = _latest_capture_time(rows)
+    latest_capture = _latest_capture_row(rows)
     lines = [
         "# Phistory",
         "",
         "[中文](README_zh.md)",
         "",
-        PROJECT_DESCRIPTION,
+        "Phistory tracks how system prompts change across popular coding-agent CLIs like Claude Code, Codex, Kimi, opencode, OpenClaw, Hermes, and Pi.",
         "",
         (
-            "It installs a specific CLI release, runs it once through "
-            "[`claude-tap`](https://github.com/liaohch3/claude-tap), captures the prompt-bearing "
-            "HTTP request, and writes a comparison-friendly Markdown snapshot."
+            "Open the web viewer to compare prompt snapshots across versions and see how agent design "
+            "changes through prompts, tools, policies, and runtime instructions."
         ),
         "",
-        "Phistory uses the PyPI release `claude-tap >= 0.1.102`, where capture-only prompt snapshot export is available upstream.",
-        "",
-        "GitHub Actions checks supported CLI releases every hour and commits new prompt snapshots when they appear.",
-        "",
-        "[Open the prompt diff viewer](https://phistory.cc/)",
-        "",
-        "![Phistory prompt diff viewer](docs/screenshot.png)",
-        "",
-        "## Usage",
-        "",
-        "```bash",
-        "uv run phistory capture --latest --agents claude-code,codex,openclaw,hermes,kimi,opencode,pi",
-        "uv run phistory backfill claude-code --from 2.1.113 --to latest",
-        "uv run phistory render-index",
-        "uv run phistory render-site",
-        "```",
-        "",
-        "## Web UI",
-        "",
-        "`index.html` is a static prompt viewer with version navigation and Monaco-powered diffs. GitHub Pages deploys it directly from this repository.",
-        "",
-        (
-            "Use the viewer for human comparison. Use [`captures/index.json`](captures/index.json) "
-            "and [`docs/captures.md`](docs/captures.md) when you need an index of every archived snapshot."
-        ),
-        "",
-        "## Supported Agents",
-        "",
-        "- Claude Code (`@anthropic-ai/claude-code`)",
-        "- Codex CLI (`@openai/codex`)",
-        "- OpenClaw (`openclaw`)",
-        "- Hermes Agent (`hermes-agent`)",
-        "- Kimi CLI (`MoonshotAI/kimi-cli`)",
-        "- opencode (`opencode-ai`)",
-        "- Pi (`@earendil-works/pi-coding-agent`)",
-        "",
-        "## Capture Format",
-        "",
-        "Each capture is stored under `captures/<agent>/<version>/`:",
-        "",
-        "- `prompt.md`: normalized prompt snapshot for reading and diffing",
-        "- `trace.jsonl`: raw captured HTTP trace, kept unnormalized as evidence",
-        "- `meta.json`: package, version, command, and capture metadata",
-        "",
-        "The generated indexes are:",
-        "",
-        "- [`captures/index.json`](captures/index.json): compact machine-readable capture index",
-        "- [`docs/captures.md`](docs/captures.md): full human-readable capture table",
-        "",
-        "## For AI Agents",
-        "",
-        "- Use `README.md` for the project overview and current capture status.",
-        "- Use `captures/index.json` to discover available agents, versions, prompt paths, and trace paths.",
-        "- Use `captures/<agent>/<version>/prompt.md` when you need a normalized prompt snapshot.",
-        "- Use `captures/<agent>/<version>/trace.jsonl` only when you need raw HTTP capture evidence.",
-        "- Treat `index.html` as a human-facing viewer; it is not the canonical machine-readable index.",
-        "",
-        "## Links",
-        "",
-        "- [linux.do](https://linux.do)",
+        "**Start here:** [phistory.cc](https://phistory.cc/)",
         "",
     ]
+    if latest_capture:
+        lines.extend(
+            [
+                (
+                    f"Latest automated capture: {latest_capture['agent']} `{latest_capture['version']}` "
+                    f"at {_human_time(latest_capture['captured_at'])}; checks run hourly."
+                ),
+                "",
+            ]
+        )
+    lines.extend(
+        [
+            "![Phistory prompt diff viewer](docs/screenshot.png)",
+            "",
+            "## Why Use It",
+            "",
+            "- Follow how Anthropic, OpenAI, and other agent builders iterate on system prompts over time.",
+            "- See when new tools, permission checks, model defaults, and user-confirmation rules are added.",
+            "- Compare how different CLIs structure agent behavior, tool use, and developer-facing constraints.",
+            "- Cite stable prompt snapshots in posts, research notes, audits, or debugging reports.",
+            "",
+            "## How It Works",
+            "",
+            (
+                "For each supported release, Phistory installs the exact CLI package, runs it once through "
+                "[`claude-tap`](https://github.com/liaohch3/claude-tap), captures the prompt-bearing HTTP "
+                "request without calling the real model provider, and stores the result under "
+                "`captures/<agent>/<version>/` with `prompt.md`, `trace.jsonl`, and `meta.json`."
+            ),
+            "",
+            "GitHub Actions checks supported CLI releases every hour and commits new snapshots when they appear.",
+            "",
+            "## Local Development",
+            "",
+            "Use the hosted viewer at [phistory.cc](https://phistory.cc/). These commands are for local development, capture reproduction, historical backfills, and regenerating generated files.",
+            "",
+            "```bash",
+            "# Install the locked development environment.",
+            "uv sync --all-groups",
+            "",
+            "# Capture the latest supported CLI releases.",
+            "uv run phistory capture --latest --agents claude-code,codex,openclaw,hermes,kimi,opencode,pi",
+            "",
+            "# Capture a historical version range for one agent.",
+            "uv run phistory backfill claude-code --from 2.1.113 --to latest",
+            "",
+            "# Regenerate README.md, README_zh.md, docs/captures.md, and captures/index.json.",
+            "uv run phistory render-index",
+            "",
+            "# Regenerate the static web viewer at index.html.",
+            "uv run phistory render-site",
+            "```",
+            "",
+            "## Supported Agents",
+            "",
+            "- Claude Code (`@anthropic-ai/claude-code`)",
+            "- Codex CLI (`@openai/codex`)",
+            "- OpenClaw (`openclaw`)",
+            "- Hermes Agent (`hermes-agent`)",
+            "- Kimi CLI (`MoonshotAI/kimi-cli`)",
+            "- opencode (`opencode-ai`)",
+            "- Pi (`@earendil-works/pi-coding-agent`)",
+            "",
+        ]
+    )
 
     lines.extend(["## Capture Status", ""])
     if last_update:
@@ -150,87 +156,102 @@ def _readme_markdown(rows: list[dict[str, Any]], base: Path) -> str:
     else:
         lines.extend(["No captures yet.", ""])
 
+    lines.extend(
+        [
+            "## Project Trend",
+            "",
+            "![Phistory star history](https://api.star-history.com/svg?repos=WEIFENG2333/phistory&type=Date)",
+            "",
+        ]
+    )
+
     return "\n".join(lines)
 
 
 def _readme_zh_markdown(rows: list[dict[str, Any]], base: Path) -> str:
     status_rows = _agent_status_rows(rows)
     last_update = _latest_capture_time(rows)
+    latest_capture = _latest_capture_row(rows)
     lines = [
         "# Phistory",
         "",
         "[English](README.md)",
         "",
-        "Phistory 自动归档 Claude Code、Codex、OpenClaw、Hermes、Kimi、opencode、Pi 等 Agent CLI 的版本化系统提示词快照。",
+        "Phistory 追踪 Claude Code、Codex、Kimi、opencode、OpenClaw、Hermes、Pi 等热门 coding-agent CLI 的系统提示词如何随版本变化。",
         "",
         (
-            "它会安装指定的 CLI 版本，通过 "
-            "[`claude-tap`](https://github.com/liaohch3/claude-tap) 运行一次，抓取包含系统提示词的 "
-            "HTTP 请求，并写成方便阅读和对比的 Markdown 快照。"
+            "打开网页查看器，可以对比不同版本的提示词快照，从 prompts、tools、策略和运行时指令里观察 "
+            "agent 设计如何变化。"
         ),
         "",
-        "Phistory 使用 PyPI 版本 `claude-tap >= 0.1.102`，该版本已经在上游支持 capture-only 提示词快照导出。",
-        "",
-        "GitHub Actions 每小时检查一次支持的 CLI 版本；发现新版本后，会自动抓取并提交新的提示词快照。",
-        "",
-        "[打开提示词 diff 查看器](https://phistory.cc/)",
-        "",
-        "![Phistory prompt diff viewer](docs/screenshot.png)",
-        "",
-        "## 使用",
-        "",
-        "```bash",
-        "uv run phistory capture --latest --agents claude-code,codex,openclaw,hermes,kimi,opencode,pi",
-        "uv run phistory backfill claude-code --from 2.1.113 --to latest",
-        "uv run phistory render-index",
-        "uv run phistory render-site",
-        "```",
-        "",
-        "## Web UI",
-        "",
-        "`index.html` 是一个静态提示词查看器，支持版本切换和基于 Monaco 的 diff。GitHub Pages 会直接从这个仓库部署它。",
-        "",
-        (
-            "人工对比时使用网页查看器；如果需要完整快照索引，可以读取 "
-            "[`captures/index.json`](captures/index.json) 或 [`docs/captures.md`](docs/captures.md)。"
-        ),
-        "",
-        "## 支持的 Agent",
-        "",
-        "- Claude Code (`@anthropic-ai/claude-code`)",
-        "- Codex CLI (`@openai/codex`)",
-        "- OpenClaw (`openclaw`)",
-        "- Hermes Agent (`hermes-agent`)",
-        "- Kimi CLI (`MoonshotAI/kimi-cli`)",
-        "- opencode (`opencode-ai`)",
-        "- Pi (`@earendil-works/pi-coding-agent`)",
-        "",
-        "## 抓取格式",
-        "",
-        "每次抓取会存到 `captures/<agent>/<version>/`：",
-        "",
-        "- `prompt.md`：标准化后的提示词快照，用于阅读和 diff",
-        "- `trace.jsonl`：原始 HTTP 抓取记录，保持未标准化，作为证据留存",
-        "- `meta.json`：包名、版本、执行命令和抓取元数据",
-        "",
-        "生成的索引包括：",
-        "",
-        "- [`captures/index.json`](captures/index.json)：紧凑的机器可读快照索引",
-        "- [`docs/captures.md`](docs/captures.md)：完整的人类可读快照表",
-        "",
-        "## 给 AI Agent",
-        "",
-        "- 用 `README.md` 或 `README_zh.md` 了解项目概览和当前抓取状态。",
-        "- 用 `captures/index.json` 发现可用的 agent、版本、prompt 路径和 trace 路径。",
-        "- 需要标准化提示词快照时，读取 `captures/<agent>/<version>/prompt.md`。",
-        "- 只有需要原始 HTTP 抓取证据时，才读取 `captures/<agent>/<version>/trace.jsonl`。",
-        "- `index.html` 是面向人的网页查看器，不是 canonical 的机器可读索引。",
-        "",
-        "## 链接",
-        "",
-        "- [linux.do](https://linux.do)",
+        "**从这里开始：** [phistory.cc](https://phistory.cc/)",
         "",
     ]
+    if latest_capture:
+        lines.extend(
+            [
+                (
+                    f"最近自动抓取：{latest_capture['agent']} `{latest_capture['version']}`，"
+                    f"时间 {_human_time(latest_capture['captured_at'])}；GitHub Actions 每小时检查一次。"
+                ),
+                "",
+            ]
+        )
+    lines.extend(
+        [
+            "![Phistory prompt diff viewer](docs/screenshot.png)",
+            "",
+            "## 为什么看它",
+            "",
+            "- 观察 Anthropic、OpenAI 等团队如何持续迭代 system prompt。",
+            "- 看到新工具、权限检查、默认模型行为和用户确认规则是什么时候加入的。",
+            "- 对比不同 CLI 如何组织 agent 行为、工具调用和面向开发者的约束。",
+            "- 在文章、研究笔记、审计或排障记录里引用稳定的提示词快照。",
+            "",
+            "## 工作原理",
+            "",
+            (
+                "Phistory 会安装每个受支持的具体 CLI 版本，通过 "
+                "[`claude-tap`](https://github.com/liaohch3/claude-tap) 运行一次，抓取包含系统提示词的 "
+                "HTTP 请求，不调用真实模型服务，然后把结果保存到 `captures/<agent>/<version>/`，"
+                "里面包含 `prompt.md`、`trace.jsonl` 和 `meta.json`。"
+            ),
+            "",
+            "GitHub Actions 每小时检查一次支持的 CLI 版本；发现新版本后，会自动抓取并提交新的提示词快照。",
+            "",
+            "## 本地开发",
+            "",
+            "日常查看直接使用托管网页：[phistory.cc](https://phistory.cc/)。下面这些命令主要用于本地开发、复现抓取、回填历史版本，以及重新生成项目里的生成文件。",
+            "",
+            "```bash",
+            "# 安装锁定的开发环境。",
+            "uv sync --all-groups",
+            "",
+            "# 抓取所有受支持 CLI 的最新版本。",
+            "uv run phistory capture --latest --agents claude-code,codex,openclaw,hermes,kimi,opencode,pi",
+            "",
+            "# 回填某个 agent 的历史版本区间。",
+            "uv run phistory backfill claude-code --from 2.1.113 --to latest",
+            "",
+            "# 重新生成 README.md、README_zh.md、docs/captures.md 和 captures/index.json。",
+            "uv run phistory render-index",
+            "",
+            "# 重新生成静态网页查看器 index.html。",
+            "uv run phistory render-site",
+            "```",
+            "",
+            "## 支持的 Agent",
+            "",
+            "- Claude Code (`@anthropic-ai/claude-code`)",
+            "- Codex CLI (`@openai/codex`)",
+            "- OpenClaw (`openclaw`)",
+            "- Hermes Agent (`hermes-agent`)",
+            "- Kimi CLI (`MoonshotAI/kimi-cli`)",
+            "- opencode (`opencode-ai`)",
+            "- Pi (`@earendil-works/pi-coding-agent`)",
+            "",
+        ]
+    )
 
     lines.extend(["## 抓取状态", ""])
     if last_update:
@@ -248,6 +269,15 @@ def _readme_zh_markdown(rows: list[dict[str, Any]], base: Path) -> str:
         lines.append("")
     else:
         lines.extend(["暂无抓取。", ""])
+
+    lines.extend(
+        [
+            "## 项目趋势",
+            "",
+            "![Phistory star history](https://api.star-history.com/svg?repos=WEIFENG2333/phistory&type=Date)",
+            "",
+        ]
+    )
 
     return "\n".join(lines)
 
@@ -384,6 +414,13 @@ def _latest_capture_iso(rows: list[dict[str, Any]]) -> str:
     times = [dt for row in rows if (dt := _parse_time(row["captured_at"])) is not None]
     latest = max(times, default=None)
     return latest.isoformat().replace("+00:00", "Z") if latest else ""
+
+
+def _latest_capture_row(rows: list[dict[str, Any]]) -> dict[str, Any] | None:
+    dated_rows = [(dt, row) for row in rows if (dt := _parse_time(row["captured_at"])) is not None]
+    if not dated_rows:
+        return None
+    return max(dated_rows, key=lambda item: item[0])[1]
 
 
 def _agent_status_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
