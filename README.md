@@ -8,7 +8,7 @@ Open the web viewer to compare prompt snapshots across versions and see how agen
 
 **Start here:** [phistory.cc](https://phistory.cc/)
 
-Latest automated capture: Pi `0.79.4` at 2026-06-15 10:10 UTC; checks run hourly.
+> Archive last updated: **2026-06-15 10:10 UTC** · latest capture: Pi `0.79.4` · checked hourly
 
 ![Phistory prompt diff viewer](docs/screenshot.png)
 

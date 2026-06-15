@@ -77,8 +77,8 @@ def _readme_markdown(rows: list[dict[str, Any]], base: Path) -> str:
         lines.extend(
             [
                 (
-                    f"Latest automated capture: {latest_capture['agent']} `{latest_capture['version']}` "
-                    f"at {_human_time(latest_capture['captured_at'])}; checks run hourly."
+                    f"> Archive last updated: **{_human_time(latest_capture['captured_at'])}** · "
+                    f"latest capture: {latest_capture['agent']} `{latest_capture['version']}` · checked hourly"
                 ),
                 "",
             ]
@@ -191,8 +191,8 @@ def _readme_zh_markdown(rows: list[dict[str, Any]], base: Path) -> str:
         lines.extend(
             [
                 (
-                    f"最近自动抓取：{latest_capture['agent']} `{latest_capture['version']}`，"
-                    f"时间 {_human_time(latest_capture['captured_at'])}；GitHub Actions 每小时检查一次。"
+                    f"> 归档最近更新：**{_human_time(latest_capture['captured_at'])}** · "
+                    f"最新抓取：{latest_capture['agent']} `{latest_capture['version']}` · 每小时自动检查"
                 ),
                 "",
             ]

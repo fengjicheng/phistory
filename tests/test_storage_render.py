@@ -41,6 +41,7 @@ def test_capture_paths_and_index(tmp_path: Path):
     assert "Agent" in text
     assert "[中文](README_zh.md)" in text
     assert "popular coding-agent CLIs like Claude Code, Codex" in text
+    assert "> Archive last updated: **2026-05-22 01:00 UTC**" in text
     assert "## Why Use It" in text
     assert "Anthropic, OpenAI, and other agent builders" in text
     assert "new tools, permission checks, model defaults" in text
@@ -61,6 +62,7 @@ def test_capture_paths_and_index(tmp_path: Path):
     assert "| Agent | Version | Published | Captured | Snapshot | Raw Trace |" not in text
     assert "[English](README.md)" in zh_text
     assert "追踪 Claude Code、Codex、Kimi" in zh_text
+    assert "> 归档最近更新：**2026-05-22 01:00 UTC**" in zh_text
     assert "## 为什么看它" in zh_text
     assert "Anthropic、OpenAI 等团队" in zh_text
     assert "新工具、权限检查、默认模型行为" in zh_text
