@@ -77,8 +77,7 @@ def _readme_markdown(rows: list[dict[str, Any]], base: Path) -> str:
         lines.extend(
             [
                 (
-                    f"> Archive last updated: **{_human_time(latest_capture['captured_at'])}** · "
-                    f"latest capture: {latest_capture['agent']} `{latest_capture['version']}` · checked hourly"
+                    f"> Checks for new releases hourly. Archive last updated: **{_human_time(latest_capture['captured_at'])}**."
                 ),
                 "",
             ]
@@ -190,10 +189,7 @@ def _readme_zh_markdown(rows: list[dict[str, Any]], base: Path) -> str:
     if latest_capture:
         lines.extend(
             [
-                (
-                    f"> 归档最近更新：**{_human_time(latest_capture['captured_at'])}** · "
-                    f"最新抓取：{latest_capture['agent']} `{latest_capture['version']}` · 每小时自动检查"
-                ),
+                (f"> 每小时自动检查新版本，归档最近更新于 **{_human_time(latest_capture['captured_at'])}**。"),
                 "",
             ]
         )

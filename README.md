@@ -8,7 +8,7 @@ Open the web viewer to compare prompt snapshots across versions and see how agen
 
 **Start here:** [phistory.cc](https://phistory.cc/)
 
-> Archive last updated: **2026-06-15 10:10 UTC** · latest capture: Pi `0.79.4` · checked hourly
+> Checks for new releases hourly. Archive last updated: **2026-06-15 10:10 UTC**.
 
 ![Phistory prompt diff viewer](docs/screenshot.png)
 
