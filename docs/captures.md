@@ -4,6 +4,7 @@ Full generated index of archived prompt snapshots. The short project overview li
 
 | Agent | Version | Published | Captured | Snapshot | Raw Trace |
 | --- | --- | --- | --- | --- | --- |
+| Pi | `0.79.5` | 2026-06-16 18:07 UTC | 2026-06-16 21:33 UTC | [pi 0.79.5, published 2026-06-16 18:07 UTC](../captures/pi/0.79.5/prompt.md) | [trace.jsonl](../captures/pi/0.79.5/trace.jsonl) |
 | Pi | `0.79.4` | 2026-06-15 08:32 UTC | 2026-06-15 10:10 UTC | [pi 0.79.4, published 2026-06-15 08:32 UTC](../captures/pi/0.79.4/prompt.md) | [trace.jsonl](../captures/pi/0.79.4/trace.jsonl) |
 | Pi | `0.79.3` | 2026-06-13 09:21 UTC | 2026-06-13 09:45 UTC | [pi 0.79.3, published 2026-06-13 09:21 UTC](../captures/pi/0.79.3/prompt.md) | [trace.jsonl](../captures/pi/0.79.3/trace.jsonl) |
 | Pi | `0.79.2` | 2026-06-12 22:29 UTC | 2026-06-13 00:04 UTC | [pi 0.79.2, published 2026-06-12 22:29 UTC](../captures/pi/0.79.2/prompt.md) | [trace.jsonl](../captures/pi/0.79.2/trace.jsonl) |
@@ -248,6 +249,7 @@ Full generated index of archived prompt snapshots. The short project overview li
 | Codex CLI | `0.84.0` | 2026-01-15 01:30 UTC | 2026-05-23 16:08 UTC | [codex 0.84.0, published 2026-01-15 01:30 UTC](../captures/codex/0.84.0/prompt.md) | [trace.jsonl](../captures/codex/0.84.0/trace.jsonl) |
 | Codex CLI | `0.81.0` | 2026-01-14 18:13 UTC | 2026-05-23 16:08 UTC | [codex 0.81.0, published 2026-01-14 18:13 UTC](../captures/codex/0.81.0/prompt.md) | [trace.jsonl](../captures/codex/0.81.0/trace.jsonl) |
 | Codex CLI | `0.80.0` | 2026-01-09 19:49 UTC | 2026-05-23 16:09 UTC | [codex 0.80.0, published 2026-01-09 19:49 UTC](../captures/codex/0.80.0/prompt.md) | [trace.jsonl](../captures/codex/0.80.0/trace.jsonl) |
+| Claude Code | `2.1.179` | 2026-06-16 17:51 UTC | 2026-06-16 21:33 UTC | [claude-code 2.1.179, published 2026-06-16 17:51 UTC](../captures/claude-code/2.1.179/prompt.md) | [trace.jsonl](../captures/claude-code/2.1.179/trace.jsonl) |
 | Claude Code | `2.1.178` | 2026-06-15 19:03 UTC | 2026-06-15 22:37 UTC | [claude-code 2.1.178, published 2026-06-15 19:03 UTC](../captures/claude-code/2.1.178/prompt.md) | [trace.jsonl](../captures/claude-code/2.1.178/trace.jsonl) |
 | Claude Code | `2.1.177` | 2026-06-13 01:04 UTC | 2026-06-13 05:09 UTC | [claude-code 2.1.177, published 2026-06-13 01:04 UTC](../captures/claude-code/2.1.177/prompt.md) | [trace.jsonl](../captures/claude-code/2.1.177/trace.jsonl) |
 | Claude Code | `2.1.176` | 2026-06-12 19:45 UTC | 2026-06-13 00:04 UTC | [claude-code 2.1.176, published 2026-06-12 19:45 UTC](../captures/claude-code/2.1.176/prompt.md) | [trace.jsonl](../captures/claude-code/2.1.176/trace.jsonl) |
