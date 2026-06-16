@@ -203,10 +203,12 @@ _HTML = r"""<!doctype html>
 <title>Phistory - Agent CLI System Prompt Diff History</title>
 <script>
 (() => {
+  let theme = 'dark';
   try {
     localStorage.removeItem('phistory-theme');
+    const stored = localStorage.getItem('phistory-theme-v2');
+    if (stored === 'dark' || stored === 'light') theme = stored;
   } catch {}
-  const theme = 'dark';
   document.documentElement.dataset.theme = theme;
   document.documentElement.style.colorScheme = theme;
 })();
@@ -1223,6 +1225,14 @@ const els = {
   popover: document.getElementById('popover'),
   options: document.getElementById('options')
 };
+function storedTheme() {
+  try {
+    localStorage.removeItem('phistory-theme');
+    const theme = localStorage.getItem('phistory-theme-v2');
+    if (theme === 'dark' || theme === 'light') return theme;
+  } catch {}
+  return 'dark';
+}
 const state = {
   view: 'diff',
   agent: manifest.agents[0]?.id || '',
@@ -1230,7 +1240,7 @@ const state = {
   to: '',
   followLatest: true,
   normalizeQuery: false,
-  theme: 'dark',
+  theme: storedTheme(),
   picker: null,
   cache: new Map(),
   traceCache: new Map(),
@@ -2076,6 +2086,9 @@ function importantHeader(headers, name) {
 
 function toggleTheme() {
   state.theme = state.theme === 'dark' ? 'light' : 'dark';
+  try {
+    localStorage.setItem('phistory-theme-v2', state.theme);
+  } catch {}
   applyTheme();
   if (state.monaco) state.monaco.editor.setTheme(monacoTheme());
 }
