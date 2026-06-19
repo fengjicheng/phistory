@@ -1,0 +1,1 @@
+"""Bundled known prompt catalogs."""

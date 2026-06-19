@@ -48,6 +48,13 @@ def versions_between(agent: AgentSpec, start: str, end: str, *, include_prerelea
     return versions[start_idx : end_idx + 1]
 
 
+def version_info(agent: AgentSpec, version: str) -> VersionInfo:
+    for item in all_versions(agent, include_prerelease=True):
+        if item.version == version:
+            return item
+    return VersionInfo(version=version)
+
+
 def install_agent(agent: AgentSpec, version: str, install_dir: Path) -> Path:
     if agent.source == "npm":
         return _install_npm(agent, version, install_dir)

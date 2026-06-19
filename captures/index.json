@@ -2569,7 +2569,10 @@
       "captured_at": "2026-06-19T05:37:58.617811+00:00",
       "prompt": "captures/claude-code/2.1.183/prompt.md",
       "trace": "captures/claude-code/2.1.183/trace.jsonl",
-      "meta": "captures/claude-code/2.1.183/meta.json"
+      "meta": "captures/claude-code/2.1.183/meta.json",
+      "static_prompts": "captures/claude-code/2.1.183/static-prompts.md",
+      "static_prompts_json": "captures/claude-code/2.1.183/static-prompts.json",
+      "static_candidates_json": "captures/claude-code/2.1.183/static-candidates.json"
     },
     {
       "agent_id": "claude-code",
@@ -2579,7 +2582,10 @@
       "captured_at": "2026-06-17T22:24:09.397818+00:00",
       "prompt": "captures/claude-code/2.1.181/prompt.md",
       "trace": "captures/claude-code/2.1.181/trace.jsonl",
-      "meta": "captures/claude-code/2.1.181/meta.json"
+      "meta": "captures/claude-code/2.1.181/meta.json",
+      "static_prompts": "captures/claude-code/2.1.181/static-prompts.md",
+      "static_prompts_json": "captures/claude-code/2.1.181/static-prompts.json",
+      "static_candidates_json": "captures/claude-code/2.1.181/static-candidates.json"
     },
     {
       "agent_id": "claude-code",
@@ -2589,7 +2595,10 @@
       "captured_at": "2026-06-16T21:33:21.670887+00:00",
       "prompt": "captures/claude-code/2.1.179/prompt.md",
       "trace": "captures/claude-code/2.1.179/trace.jsonl",
-      "meta": "captures/claude-code/2.1.179/meta.json"
+      "meta": "captures/claude-code/2.1.179/meta.json",
+      "static_prompts": "captures/claude-code/2.1.179/static-prompts.md",
+      "static_prompts_json": "captures/claude-code/2.1.179/static-prompts.json",
+      "static_candidates_json": "captures/claude-code/2.1.179/static-candidates.json"
     },
     {
       "agent_id": "claude-code",
@@ -2599,7 +2608,10 @@
       "captured_at": "2026-06-15T22:37:31.833710+00:00",
       "prompt": "captures/claude-code/2.1.178/prompt.md",
       "trace": "captures/claude-code/2.1.178/trace.jsonl",
-      "meta": "captures/claude-code/2.1.178/meta.json"
+      "meta": "captures/claude-code/2.1.178/meta.json",
+      "static_prompts": "captures/claude-code/2.1.178/static-prompts.md",
+      "static_prompts_json": "captures/claude-code/2.1.178/static-prompts.json",
+      "static_candidates_json": "captures/claude-code/2.1.178/static-candidates.json"
     },
     {
       "agent_id": "claude-code",
@@ -2609,7 +2621,10 @@
       "captured_at": "2026-06-13T05:09:04.583392+00:00",
       "prompt": "captures/claude-code/2.1.177/prompt.md",
       "trace": "captures/claude-code/2.1.177/trace.jsonl",
-      "meta": "captures/claude-code/2.1.177/meta.json"
+      "meta": "captures/claude-code/2.1.177/meta.json",
+      "static_prompts": "captures/claude-code/2.1.177/static-prompts.md",
+      "static_prompts_json": "captures/claude-code/2.1.177/static-prompts.json",
+      "static_candidates_json": "captures/claude-code/2.1.177/static-candidates.json"
     },
     {
       "agent_id": "claude-code",
@@ -2619,7 +2634,10 @@
       "captured_at": "2026-06-13T00:04:44.180505+00:00",
       "prompt": "captures/claude-code/2.1.176/prompt.md",
       "trace": "captures/claude-code/2.1.176/trace.jsonl",
-      "meta": "captures/claude-code/2.1.176/meta.json"
+      "meta": "captures/claude-code/2.1.176/meta.json",
+      "static_prompts": "captures/claude-code/2.1.176/static-prompts.md",
+      "static_prompts_json": "captures/claude-code/2.1.176/static-prompts.json",
+      "static_candidates_json": "captures/claude-code/2.1.176/static-candidates.json"
     },
     {
       "agent_id": "claude-code",
@@ -2629,7 +2647,10 @@
       "captured_at": "2026-06-12T05:19:41.837140+00:00",
       "prompt": "captures/claude-code/2.1.175/prompt.md",
       "trace": "captures/claude-code/2.1.175/trace.jsonl",
-      "meta": "captures/claude-code/2.1.175/meta.json"
+      "meta": "captures/claude-code/2.1.175/meta.json",
+      "static_prompts": "captures/claude-code/2.1.175/static-prompts.md",
+      "static_prompts_json": "captures/claude-code/2.1.175/static-prompts.json",
+      "static_candidates_json": "captures/claude-code/2.1.175/static-candidates.json"
     },
     {
       "agent_id": "claude-code",
@@ -2639,7 +2660,10 @@
       "captured_at": "2026-06-11T11:14:32.611048+00:00",
       "prompt": "captures/claude-code/2.1.173/prompt.md",
       "trace": "captures/claude-code/2.1.173/trace.jsonl",
-      "meta": "captures/claude-code/2.1.173/meta.json"
+      "meta": "captures/claude-code/2.1.173/meta.json",
+      "static_prompts": "captures/claude-code/2.1.173/static-prompts.md",
+      "static_prompts_json": "captures/claude-code/2.1.173/static-prompts.json",
+      "static_candidates_json": "captures/claude-code/2.1.173/static-candidates.json"
     },
     {
       "agent_id": "claude-code",
@@ -2649,7 +2673,10 @@
       "captured_at": "2026-06-10T22:57:44.251463+00:00",
       "prompt": "captures/claude-code/2.1.172/prompt.md",
       "trace": "captures/claude-code/2.1.172/trace.jsonl",
-      "meta": "captures/claude-code/2.1.172/meta.json"
+      "meta": "captures/claude-code/2.1.172/meta.json",
+      "static_prompts": "captures/claude-code/2.1.172/static-prompts.md",
+      "static_prompts_json": "captures/claude-code/2.1.172/static-prompts.json",
+      "static_candidates_json": "captures/claude-code/2.1.172/static-candidates.json"
     },
     {
       "agent_id": "claude-code",
@@ -2659,7 +2686,10 @@
       "captured_at": "2026-06-09T18:05:49.653694+00:00",
       "prompt": "captures/claude-code/2.1.170/prompt.md",
       "trace": "captures/claude-code/2.1.170/trace.jsonl",
-      "meta": "captures/claude-code/2.1.170/meta.json"
+      "meta": "captures/claude-code/2.1.170/meta.json",
+      "static_prompts": "captures/claude-code/2.1.170/static-prompts.md",
+      "static_prompts_json": "captures/claude-code/2.1.170/static-prompts.json",
+      "static_candidates_json": "captures/claude-code/2.1.170/static-candidates.json"
     },
     {
       "agent_id": "claude-code",

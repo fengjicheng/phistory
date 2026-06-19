@@ -68,6 +68,9 @@ def _site_row(row: dict) -> dict:
         "captured_display": _display_time(row.get("captured_at") or ""),
         "prompt": row["prompt"].as_posix(),
         "trace": row["trace"].as_posix(),
+        "static_prompts": row["static_prompts"].as_posix() if row.get("static_prompts") else "",
+        "static_prompts_json": row["static_prompts_json"].as_posix() if row.get("static_prompts_json") else "",
+        "static_candidates_json": row["static_candidates_json"].as_posix() if row.get("static_candidates_json") else "",
     }
 
 
@@ -498,7 +501,8 @@ a:hover { text-decoration: none; }
   overscroll-behavior: contain;
 }
 #diff { position: absolute; inset: 0; }
-.trace-view {
+.trace-view,
+.static-view {
   position: absolute;
   inset: 0;
   display: none;
@@ -510,25 +514,44 @@ a:hover { text-decoration: none; }
   scrollbar-color: var(--scrollbar) transparent;
   background: var(--bg);
 }
-.trace-view::-webkit-scrollbar { width: 8px; height: 8px; }
-.trace-view::-webkit-scrollbar-track { background: transparent; }
-.trace-view::-webkit-scrollbar-thumb {
+.trace-view::-webkit-scrollbar,
+.static-view::-webkit-scrollbar { width: 8px; height: 8px; }
+.trace-view::-webkit-scrollbar-track,
+.static-view::-webkit-scrollbar-track { background: transparent; }
+.trace-view::-webkit-scrollbar-thumb,
+.static-view::-webkit-scrollbar-thumb {
   background: var(--scrollbar);
   border-radius: 999px;
 }
-.shell[data-view="trace"] #diff { display: none; }
+.shell[data-view="trace"] #diff,
+.shell[data-view="static"] #diff { display: none; }
 .shell[data-view="trace"] .trace-view { display: block; }
+.shell[data-view="static"] .static-view { display: block; }
 .shell[data-view="trace"] .compare {
   grid-template-columns: 236px;
 }
+.shell[data-view="static"] .compare {
+  grid-template-columns: 236px;
+}
 .shell[data-view="trace"] #from,
-.shell[data-view="trace"] .arrow {
+.shell[data-view="trace"] .arrow,
+.shell[data-view="static"] #from,
+.shell[data-view="static"] .arrow {
   display: none;
 }
 .trace-page {
   max-width: 1120px;
   margin: 0 auto;
   padding: 22px 22px 42px;
+}
+.static-page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 22px 22px 52px;
+}
+.static-page .trace-rendered {
+  padding: 0;
+  background: transparent;
 }
 .trace-hero {
   border-bottom: 1px solid var(--line);
@@ -730,9 +753,17 @@ a:hover { text-decoration: none; }
   padding: 0 3px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
 }
+.trace-rendered pre > code {
+  display: block;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  white-space: inherit;
+}
 .trace-rendered pre {
-  margin: 10px 0;
-  padding: 10px;
+  margin: 12px 0 18px;
+  padding: 13px 14px;
   border: 1px solid var(--line);
   border-radius: 7px;
   background: var(--control-bg);
@@ -1114,7 +1145,11 @@ a:hover { text-decoration: none; }
   .shell[data-view="trace"] .compare {
     grid-template-columns: minmax(0, 1fr);
   }
-  .trace-page {
+  .shell[data-view="static"] .compare {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .trace-page,
+  .static-page {
     padding: 18px 14px 34px;
   }
   .trace-title h2 {
@@ -1202,6 +1237,7 @@ a:hover { text-decoration: none; }
   <main class="editor">
     <div id="diff"><div class="empty">Loading diff viewer...</div></div>
     <div id="trace" class="trace-view"><div class="empty">Loading trace detail...</div></div>
+    <div id="static" class="static-view"><div class="empty">Loading static prompts...</div></div>
   </main>
 </div>
 <div id="popover" class="popover">
@@ -1222,6 +1258,7 @@ const els = {
   theme: document.getElementById('theme'),
   diff: document.getElementById('diff'),
   trace: document.getElementById('trace'),
+  static: document.getElementById('static'),
   popover: document.getElementById('popover'),
   options: document.getElementById('options')
 };
@@ -1244,6 +1281,7 @@ const state = {
   picker: null,
   cache: new Map(),
   traceCache: new Map(),
+  staticCache: new Map(),
   traceScrollTop: 0,
   traceOpenSections: new Set(),
   traceOpenTools: new Set(),
@@ -1268,11 +1306,11 @@ function boot() {
 
 function readQuery() {
   const params = new URLSearchParams(location.search);
-  state.view = params.get('view') === 'trace' ? 'trace' : 'diff';
+  state.view = ['trace', 'static'].includes(params.get('view')) ? params.get('view') : 'diff';
   const agentId = params.get('agent');
   if (agentId && agents.has(agentId)) state.agent = agentId;
   const agent = currentAgent();
-  if (state.view === 'trace') {
+  if (state.view === 'trace' || state.view === 'static') {
     const version = params.get('version') || params.get('to');
     state.to = hasVersion(agent, version) ? version : agent.latest.version;
     state.from = previousVersion(agent, state.to).version;
@@ -1295,8 +1333,8 @@ function readQuery() {
 }
 
 function writeQuery() {
-  const params = state.view === 'trace'
-    ? new URLSearchParams({ view: 'trace', agent: state.agent, version: state.to })
+  const params = state.view === 'trace' || state.view === 'static'
+    ? new URLSearchParams({ view: state.view, agent: state.agent, version: state.to })
     : (state.followLatest
       ? new URLSearchParams({ agent: state.agent, range: 'latest' })
       : new URLSearchParams({ agent: state.agent, from: state.from, to: state.to }));
@@ -1353,8 +1391,9 @@ function renderControls() {
   els.agent.innerHTML = `${agentIconHtml(agent)}<strong>${escapeHtml(agent.name)}</strong>`;
   els.from.innerHTML = versionLabel(from);
   els.to.innerHTML = versionLabel(to, isLatestVersion(agent, to.version));
-  els.viewToggle.textContent = state.view === 'trace' ? 'Diff' : 'Trace';
-  els.viewToggle.title = state.view === 'trace' ? 'Open prompt diff' : 'Open trace detail';
+  const next = nextView();
+  els.viewToggle.textContent = next === 'diff' ? 'Diff' : (next === 'trace' ? 'Trace' : 'Static');
+  els.viewToggle.title = next === 'diff' ? 'Open prompt diff' : (next === 'trace' ? 'Open trace detail' : 'Open static prompts');
 }
 
 function agentIconHtml(agent) {
@@ -1461,7 +1500,7 @@ function selectOption(value) {
   if (state.picker === 'agent') {
     state.agent = value;
     const agent = currentAgent();
-    if (state.view === 'trace') {
+    if (state.view === 'trace' || state.view === 'static') {
       state.to = agent.latest.version;
       state.from = previousVersion(agent, state.to).version;
       state.followLatest = true;
@@ -1476,7 +1515,7 @@ function selectOption(value) {
   } else if (state.picker === 'to') {
     state.followLatest = false;
     state.to = value;
-    if (state.view === 'trace') {
+    if (state.view === 'trace' || state.view === 'static') {
       state.from = previousVersion(currentAgent(), state.to).version;
     } else {
       normalizeVersionRange(currentAgent(), 'to');
@@ -1498,15 +1537,25 @@ function refreshView() {
     renderTrace().catch(showError);
     return;
   }
+  if (state.view === 'static') {
+    renderStatic().catch(showError);
+    return;
+  }
   loadMonaco().then(renderDiff).catch(showError);
 }
 
 function toggleView() {
-  state.view = state.view === 'trace' ? 'diff' : 'trace';
-  if (state.view === 'trace') {
+  state.view = nextView();
+  if (state.view === 'trace' || state.view === 'static') {
     state.from = previousVersion(currentAgent(), state.to).version;
   }
   refresh();
+}
+
+function nextView() {
+  if (state.view === 'diff') return 'trace';
+  if (state.view === 'trace') return 'static';
+  return 'diff';
 }
 
 function loadMonaco() {
@@ -1616,6 +1665,16 @@ async function loadTrace(item) {
   return records;
 }
 
+async function loadStaticPrompts(item) {
+  if (!item.static_prompts) return '';
+  if (state.staticCache.has(item.static_prompts)) return state.staticCache.get(item.static_prompts);
+  const response = await fetch(item.static_prompts);
+  if (!response.ok) throw new Error(`Unable to load ${item.static_prompts}`);
+  const text = await response.text();
+  state.staticCache.set(item.static_prompts, text);
+  return text;
+}
+
 async function renderTrace() {
   const item = versionInfo(state.to);
   const records = await loadTrace(item);
@@ -1627,6 +1686,16 @@ async function renderTrace() {
   const detail = normalizeTraceRecord(selected.record, selected.index, records.length);
   els.trace.innerHTML = traceDetailHtml(item, detail);
   restoreTraceState();
+}
+
+async function renderStatic() {
+  const item = versionInfo(state.to);
+  const markdown = await loadStaticPrompts(item);
+  if (!markdown) {
+    els.static.innerHTML = '<div class="empty">No static prompts extracted for this version.</div>';
+    return;
+  }
+  els.static.innerHTML = staticPromptsHtml(item, markdown);
 }
 
 function selectMainTraceRecord(records) {
@@ -1879,6 +1948,25 @@ function toggleTracePanel(summary) {
 function setTracePanelOpen(panel, open) {
   panel.classList.toggle('is-open', open);
   panel.querySelector(':scope > .trace-summary')?.setAttribute('aria-expanded', String(open));
+}
+
+function staticPromptsHtml(item, markdown) {
+  const title = `${currentAgent().name} ${item.version}`;
+  const body = staticPromptBodyMarkdown(markdown);
+  return `<article class="static-page">
+    <header class="trace-hero">
+      <div class="trace-eyebrow">Static prompts</div>
+      <div class="trace-title"><h2>${escapeHtml(title)}</h2><span>${escapeHtml(item.published_compact)}</span></div>
+      <div class="trace-meta">${item.published_display ? metaItem('Published', item.published_display) : ''}${item.captured_display ? metaItem('Captured', item.captured_display) : ''}${item.static_prompts_json ? metaItem('Data', 'static-prompts.json') : ''}</div>
+    </header>
+    <div class="trace-rendered">${markdownHtml(body)}</div>
+  </article>`;
+}
+
+function staticPromptBodyMarkdown(markdown) {
+  return markdown
+    .replace(/^# Static Prompts\s*\n+\s*Agent:\s*`[^`]*`\s*\n\s*Version:\s*`[^`]*`\s*\n+/i, '')
+    .trim();
 }
 
 function traceDetailHtml(item, detail) {

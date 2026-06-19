@@ -14,9 +14,10 @@ This file is for future coding agents. Read it before changing the project.
 - `phistory/storage.py`: capture directory preparation, cleanup, trace copying, and metadata writing.
 - `phistory/render.py`: regenerates `README.md` from capture metadata.
 - `phistory/site.py`: regenerates the single-file static web UI in `index.html`.
-- `phistory/cli.py`: CLI entrypoint for `capture`, `backfill`, `render-index`, and `render-site`.
+- `phistory/static_prompts/`: static prompt extraction for package-embedded prompt strings. It currently targets Claude Code and is structured so other agents can be added later.
+- `phistory/cli.py`: CLI entrypoint for `capture`, `backfill`, `extract-static`, `render-index`, and `render-site`.
 - `tests/`: focused unit and local integration tests for package sources, registry contracts, capture behavior, and rendering.
-- `.github/workflows/capture.yml`: hourly capture workflow. It runs lint, tests, latest smoke capture for all agents, real latest capture, renders artifacts, and commits updates.
+- `.github/workflows/capture.yml`: hourly capture workflow. It runs lint, tests, build, latest smoke capture for all agents, real latest capture, Claude Code static prompt extraction for the latest captured versions, renders artifacts, and commits updates.
 - `.github/workflows/pages.yml`: GitHub Pages deployment for the static site.
 
 Generated capture artifacts live in:
@@ -28,6 +29,16 @@ captures/<agent>/<version>/meta.json
 ```
 
 `prompt.md` is normalized for human reading and diffs. `trace.jsonl` is raw evidence and should not be rewritten for presentation-only cleanup.
+
+Claude Code captures may also include:
+
+```text
+captures/claude-code/<version>/static-candidates.json
+captures/claude-code/<version>/static-prompts.json
+captures/claude-code/<version>/static-prompts.md
+```
+
+`static-candidates.json` is the archived raw candidate set after broad resource filtering. Keep it deterministic and useful for future rematching. `static-prompts.*` is the matched/readable output derived from those candidates and the local catalog in `phistory/static_prompts/catalogs/`.
 
 ## Capture Principle
 
@@ -47,9 +58,12 @@ For each agent/version, the flow is:
 4. Write only the minimal fake auth/config needed for the CLI to emit a prompt-bearing request.
 5. Launch `python -m claude_tap run <tap_client> --export-prompt ... -- <agent command>`.
 6. Save `prompt.md`, raw `trace.jsonl`, and `meta.json`.
-7. Remove temporary tap output unless `--keep-tap` is used.
+7. For Claude Code, also extract package-embedded static prompt candidates and matched static prompts.
+8. Remove temporary tap output unless `--keep-tap` is used.
 
 Do not add direct model API calls to Phistory. The capture boundary is `claude-tap`.
+
+Static prompt extraction is separate from request capture. It parses installed package code, keeps plausible prompt-like string/template candidates, matches known catalog entries by hash or anchor, and writes deterministic Markdown/JSON. Prefer improving general filters and catalog anchors over adding version-specific special cases.
 
 ## Supported Agents
 
@@ -103,6 +117,14 @@ For generated artifacts:
 uv run phistory render-index
 uv run phistory render-site
 ```
+
+For Claude Code static prompt artifacts:
+
+```bash
+uv run phistory extract-static claude-code --latest-captured 10
+```
+
+Use `--refresh-candidates` only when the extractor/filtering logic changed and the raw candidate archives should be regenerated from installed packages.
 
 For a targeted historical check:
 

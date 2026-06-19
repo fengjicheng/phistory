@@ -28,5 +28,15 @@
     "--no-session-persistence",
     "-p",
     "Reply with one short sentence."
-  ]
+  ],
+  "static_prompts": {
+    "supported": true,
+    "candidates_path": "static-candidates.json",
+    "prompt_path": "static-prompts.md",
+    "json_path": "static-prompts.json",
+    "total": 741,
+    "known": 507,
+    "unknown": 234,
+    "source": "node_modules/@anthropic-ai/claude-code/bin/claude.exe"
+  }
 }

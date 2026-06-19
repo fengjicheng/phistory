@@ -37,6 +37,9 @@ def read_capture_rows(root: Path) -> list[dict[str, Any]]:
         version_dir = meta_path.parent
         prompt = version_dir / "prompt.md"
         trace = version_dir / "trace.jsonl"
+        static_prompts = version_dir / "static-prompts.md"
+        static_prompts_json = version_dir / "static-prompts.json"
+        static_candidates_json = version_dir / "static-candidates.json"
         if not prompt.exists() or not trace.exists():
             continue
         rows.append(
@@ -48,6 +51,9 @@ def read_capture_rows(root: Path) -> list[dict[str, Any]]:
                 "captured_at": meta.get("captured_at") or "",
                 "prompt": prompt,
                 "trace": trace,
+                "static_prompts": static_prompts if static_prompts.exists() else None,
+                "static_prompts_json": static_prompts_json if static_prompts_json.exists() else None,
+                "static_candidates_json": static_candidates_json if static_candidates_json.exists() else None,
                 "meta": meta_path,
             }
         )
@@ -102,6 +108,13 @@ def _readme_markdown(rows: list[dict[str, Any]], base: Path) -> str:
                 "`captures/<agent>/<version>/` with `prompt.md`, `trace.jsonl`, and `meta.json`."
             ),
             "",
+            (
+                "For recent Claude Code releases, Phistory also extracts static prompt-like strings from the "
+                "installed package and stores them as `static-prompts.md`, `static-prompts.json`, and "
+                "`static-candidates.json`. The candidate archive keeps the raw extraction input so matching "
+                "rules can be improved later without reinstalling every historical package."
+            ),
+            "",
             "GitHub Actions checks supported CLI releases every hour and commits new snapshots when they appear.",
             "",
             "## Local Development",
@@ -117,6 +130,9 @@ def _readme_markdown(rows: list[dict[str, Any]], base: Path) -> str:
             "",
             "# Capture a historical version range for one agent.",
             "uv run phistory backfill claude-code --from 2.1.113 --to latest",
+            "",
+            "# Rebuild static prompt files for the latest 10 captured Claude Code versions.",
+            "uv run phistory extract-static claude-code --latest-captured 10",
             "",
             "# Regenerate README.md, README_zh.md, docs/captures.md, and captures/index.json.",
             "uv run phistory render-index",
@@ -213,6 +229,12 @@ def _readme_zh_markdown(rows: list[dict[str, Any]], base: Path) -> str:
                 "里面包含 `prompt.md`、`trace.jsonl` 和 `meta.json`。"
             ),
             "",
+            (
+                "对于最近的 Claude Code 版本，Phistory 还会从安装包里提取疑似静态 prompt 的字符串，"
+                "保存为 `static-prompts.md`、`static-prompts.json` 和 `static-candidates.json`。"
+                "`static-candidates.json` 会保留原始候选内容，方便以后改进匹配规则时不用重新安装所有历史包。"
+            ),
+            "",
             "GitHub Actions 每小时检查一次支持的 CLI 版本；发现新版本后，会自动抓取并提交新的提示词快照。",
             "",
             "## 本地开发",
@@ -228,6 +250,9 @@ def _readme_zh_markdown(rows: list[dict[str, Any]], base: Path) -> str:
             "",
             "# 回填某个 agent 的历史版本区间。",
             "uv run phistory backfill claude-code --from 2.1.113 --to latest",
+            "",
+            "# 重建最近 10 个已捕获 Claude Code 版本的静态 prompt 文件。",
+            "uv run phistory extract-static claude-code --latest-captured 10",
             "",
             "# 重新生成 README.md、README_zh.md、docs/captures.md 和 captures/index.json。",
             "uv run phistory render-index",
@@ -293,17 +318,19 @@ def _write_capture_doc(rows: list[dict[str, Any]], base: Path) -> None:
     if not rows:
         lines.extend(["No captures yet.", ""])
     else:
-        lines.append("| Agent | Version | Published | Captured | Snapshot | Raw Trace |")
-        lines.append("| --- | --- | --- | --- | --- | --- |")
+        lines.append("| Agent | Version | Published | Captured | Snapshot | Static | Candidates | Raw Trace |")
+        lines.append("| --- | --- | --- | --- | --- | --- | --- | --- |")
         for row in _sorted_capture_rows(rows):
             prompt = _rel(row["prompt"], output.parent)
             trace = _rel(row["trace"], output.parent)
+            static = _optional_link(row.get("static_prompts"), output.parent, "static-prompts.md")
+            candidates = _optional_link(row.get("static_candidates_json"), output.parent, "static-candidates.json")
             published = _human_time(row["published_at"])
             captured = _human_time(row["captured_at"])
             prompt_label = _snapshot_label(row["agent_id"], row["version"], published)
             lines.append(
                 f"| {row['agent']} | `{row['version']}` | {published} | {captured} | "
-                f"[{prompt_label}]({prompt}) | [trace.jsonl]({trace}) |"
+                f"[{prompt_label}]({prompt}) | {static} | {candidates} | [trace.jsonl]({trace}) |"
             )
         lines.append("")
     output.write_text("\n".join(lines), encoding="utf-8")
@@ -327,21 +354,29 @@ def _write_capture_json(rows: list[dict[str, Any]], base: Path) -> None:
             }
             for item in _agent_status_rows(rows)
         ],
-        "captures": [
-            {
-                "agent_id": row["agent_id"],
-                "agent": row["agent"],
-                "version": row["version"],
-                "published_at": row["published_at"],
-                "captured_at": row["captured_at"],
-                "prompt": _rel(row["prompt"], base),
-                "trace": _rel(row["trace"], base),
-                "meta": _rel(row["meta"], base),
-            }
-            for row in _sorted_capture_rows(rows)
-        ],
+        "captures": [_capture_json_row(row, base) for row in _sorted_capture_rows(rows)],
     }
     output.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def _capture_json_row(row: dict[str, Any], base: Path) -> dict[str, str]:
+    payload = {
+        "agent_id": row["agent_id"],
+        "agent": row["agent"],
+        "version": row["version"],
+        "published_at": row["published_at"],
+        "captured_at": row["captured_at"],
+        "prompt": _rel(row["prompt"], base),
+        "trace": _rel(row["trace"], base),
+        "meta": _rel(row["meta"], base),
+    }
+    if row.get("static_prompts"):
+        payload["static_prompts"] = _rel(row["static_prompts"], base)
+    if row.get("static_prompts_json"):
+        payload["static_prompts_json"] = _rel(row["static_prompts_json"], base)
+    if row.get("static_candidates_json"):
+        payload["static_candidates_json"] = _rel(row["static_candidates_json"], base)
+    return payload
 
 
 def _rel(path: Path, base: Path) -> str:
@@ -349,6 +384,12 @@ def _rel(path: Path, base: Path) -> str:
         return path.resolve().relative_to(base.resolve()).as_posix()
     except ValueError:
         return Path(os.path.relpath(path.resolve(), base.resolve())).as_posix()
+
+
+def _optional_link(path: Path | None, base: Path, label: str) -> str:
+    if path is None:
+        return ""
+    return f"[{label}]({_rel(path, base)})"
 
 
 def _version_key(version: str) -> tuple:

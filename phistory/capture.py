@@ -11,6 +11,7 @@ from tempfile import TemporaryDirectory
 
 from phistory import packages
 from phistory.models import CaptureResult, CaptureTarget
+from phistory.static_prompts.extract import extract_static_prompts, static_prompts_meta
 from phistory.storage import copy_trace, is_captured, latest_trace, prepare_version_dir, remove_if_exists, write_meta
 from phistory.subprocesses import run
 
@@ -89,6 +90,12 @@ def capture_target(
             str(work_dir): "$PHISTORY_WORKSPACE",
         }
         _sanitize_file(prompt_path, replacements)
+        static_prompts = None
+        static_prompts_error = None
+        try:
+            static_prompts = extract_static_prompts(target, install_dir)
+        except Exception as exc:
+            static_prompts_error = str(exc)
         write_meta(
             target,
             {
@@ -105,6 +112,7 @@ def capture_target(
                 "client_exit_code": result.returncode,
                 "duration_seconds": round(time.time() - started, 3),
                 "command": [_replace_many(part, replacements) for part in _portable_command(argv, version_dir)],
+                "static_prompts": static_prompts_meta(target, static_prompts, static_prompts_error),
             },
         )
         if not keep_tap:

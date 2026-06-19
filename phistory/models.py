@@ -55,6 +55,18 @@ class CaptureTarget:
     def meta_path(self) -> Path:
         return self.version_dir / "meta.json"
 
+    @property
+    def static_prompts_path(self) -> Path:
+        return self.version_dir / "static-prompts.md"
+
+    @property
+    def static_prompts_json_path(self) -> Path:
+        return self.version_dir / "static-prompts.json"
+
+    @property
+    def static_candidates_json_path(self) -> Path:
+        return self.version_dir / "static-candidates.json"
+
 
 @dataclass(frozen=True)
 class CommandResult:

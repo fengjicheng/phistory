@@ -83,7 +83,7 @@ def test_capture_paths_and_index(tmp_path: Path):
     capture_index = tmp_path / "captures/index.json"
     capture_doc_text = capture_doc.read_text(encoding="utf-8")
     capture_index_json = json.loads(capture_index.read_text(encoding="utf-8"))
-    assert "| Agent | Version | Published | Captured | Snapshot | Raw Trace |" in capture_doc_text
+    assert "| Agent | Version | Published | Captured | Snapshot | Static | Candidates | Raw Trace |" in capture_doc_text
     assert "[agent 1.0.0, published 2026-05-22 00:00 UTC]" in capture_doc_text
     assert capture_index_json["agents"][0]["latest_version"] == "1.0.0"
     assert capture_index_json["captures"][0]["prompt"] == "captures/agent/1.0.0/prompt.md"
@@ -146,6 +146,9 @@ def test_render_site_writes_static_html_manifest(tmp_path: Path):
         target.version_dir.mkdir(parents=True)
         target.prompt_path.write_text(f"# Prompt {version}\n", encoding="utf-8")
         target.trace_path.write_text("{}\n", encoding="utf-8")
+        if version == "1.1.0":
+            target.static_prompts_path.write_text("# Static Prompts\n", encoding="utf-8")
+            target.static_prompts_json_path.write_text('{"schema_version":1}\n', encoding="utf-8")
         write_meta(
             target,
             {
@@ -178,6 +181,9 @@ def test_render_site_writes_static_html_manifest(tmp_path: Path):
     assert "mini-diffstat" in text
     assert '"trace":"' in text
     assert "captures/agent/1.1.0/trace.jsonl" in text
+    assert "captures/agent/1.1.0/static-prompts.md" in text
+    assert "Open static prompts" in text
+    assert "renderStatic" in text
     assert "Trace detail" in text
     assert "Raw Request Body" in text
     assert "toolDeclarations" in text
