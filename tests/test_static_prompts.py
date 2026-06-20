@@ -1,5 +1,10 @@
 from phistory.static_prompts.catalog import load_catalog, match_candidates, normalize_for_match
-from phistory.static_prompts.extract import _keep_known_or_prompt_like, read_static_candidates, write_static_candidates
+from phistory.static_prompts.extract import (
+    _keep_known_or_prompt_like,
+    normalize_static_prompt_markdown_content,
+    read_static_candidates,
+    write_static_candidates,
+)
 from phistory.static_prompts.javascript import extract_prompt_candidates, extract_string_candidates
 from phistory.static_prompts.models import StaticCandidatesResult
 
@@ -55,6 +60,10 @@ def test_known_catalog_matches_are_kept_before_strict_unknown_filtering():
 
 def test_catalog_matching_normalizes_template_variable_names():
     assert normalize_for_match("Use ${internalName} now") == normalize_for_match("Use ${} now")
+
+
+def test_static_prompt_markdown_normalizes_template_variable_names():
+    assert normalize_static_prompt_markdown_content("Use ${Yh} and ${zh} now") == "Use ${} and ${} now"
 
 
 def test_static_candidates_roundtrip(tmp_path):

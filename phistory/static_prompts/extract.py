@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -17,6 +18,7 @@ from phistory.static_prompts.models import (
 
 STATIC_CANDIDATES_EXTRACTOR = "tree-sitter-javascript/raw-template-body"
 STATIC_CANDIDATES_MIN_LENGTH = 20
+STATIC_PROMPT_VARIABLE_RE = re.compile(r"\$\{[^}\n]{1,120}\}")
 
 
 def extract_static_prompts(target: CaptureTarget, install_dir: Path) -> StaticPromptResult | None:
@@ -312,5 +314,9 @@ def _match_markdown(title: str, match: StaticPromptMatch) -> list[str]:
     lines = [f"### {title}", ""]
     if description:
         lines.extend([description, ""])
-    lines.extend(["", "```text", candidate.content, "```", ""])
+    lines.extend(["", "```text", normalize_static_prompt_markdown_content(candidate.content), "```", ""])
     return lines
+
+
+def normalize_static_prompt_markdown_content(content: str) -> str:
+    return STATIC_PROMPT_VARIABLE_RE.sub("${}", content).replace("\t", "    ")

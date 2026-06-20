@@ -184,6 +184,10 @@ def test_render_site_writes_static_html_manifest(tmp_path: Path):
     assert "captures/agent/1.1.0/static-prompts.md" in text
     assert "Open static prompts" in text
     assert "renderStatic" in text
+    assert "static-outline" in text
+    assert "Static sections" in text
+    assert "buildStaticOutline" in text
+    assert "changedLineStats" in text
     assert "Trace detail" in text
     assert "Raw Request Body" in text
     assert "toolDeclarations" in text
