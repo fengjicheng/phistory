@@ -18,7 +18,21 @@ from phistory.static_prompts.models import (
 
 STATIC_CANDIDATES_EXTRACTOR = "tree-sitter-javascript/raw-template-body"
 STATIC_CANDIDATES_MIN_LENGTH = 20
-STATIC_PROMPT_VARIABLE_RE = re.compile(r"\$\{[^}\n]{1,120}\}")
+STATIC_PROMPT_DOUBLE_TERNARY_EXPR_RE = re.compile(
+    r'\$\{[^{}\n?]{1,400}\?"(?P<yes>(?:[^"\\\n]|\\.)*)":"(?P<no>(?:[^"\\\n]|\\.)*)"\}'
+)
+STATIC_PROMPT_SINGLE_TERNARY_EXPR_RE = re.compile(
+    r"\$\{[^{}\n?]{1,400}\?'(?P<yes>(?:[^'\\\n]|\\.)*)':'(?P<no>(?:[^'\\\n]|\\.)*)'\}"
+)
+STATIC_PROMPT_DOUBLE_STRING_EXPR_RE = re.compile(r'\$\{"(?P<value>(?:[^"\\\n]|\\.)*)"\}')
+STATIC_PROMPT_SINGLE_STRING_EXPR_RE = re.compile(r"\$\{'(?P<value>(?:[^'\\\n]|\\.)*)'\}")
+STATIC_PROMPT_TERNARY_PREFIX_RE = re.compile(r"\$\{[^{}\n?]{1,400}\?")
+STATIC_PROMPT_VARIABLE_RE = re.compile(r"\$\{[^{}\n]{1,2000}\}")
+STATIC_PROMPT_JOIN_EXPR_RE = re.compile(r"\$\{[A-Za-z_$][A-Za-z0-9_$]*\.join\(")
+STATIC_PROMPT_MAP_EXPR_RE = re.compile(r"\$\{[A-Za-z_$][A-Za-z0-9_$]*\.map\(\([A-Za-z_$][A-Za-z0-9_$]*\)=>")
+STATIC_PROMPT_SIMPLE_TERNARY_NAME_RE = re.compile(r"\$\{\?[A-Za-z_$][A-Za-z0-9_$]*:[A-Za-z_$][A-Za-z0-9_$]*\}")
+STATIC_PROMPT_DOUBLE_TERNARY_RE = re.compile(r'\$\{\}\?"(?P<branch>(?:[^"\\\n]|\\.)*)":"(?P=branch)"')
+STATIC_PROMPT_SINGLE_TERNARY_RE = re.compile(r"\$\{\}\?'(?P<branch>(?:[^'\\\n]|\\.)*)':'(?P=branch)'")
 
 
 def extract_static_prompts(target: CaptureTarget, install_dir: Path) -> StaticPromptResult | None:
@@ -142,8 +156,8 @@ def render_static_prompts_markdown(result: StaticPromptResult) -> str:
     grouped = _group_matches(result.matches)
     for category, matches in grouped:
         lines.extend([f"## {_category_title(category)}", ""])
-        for index, match in enumerate(matches, start=1):
-            title = match.entry.name if match.entry else f"Unknown static prompt {index}"
+        for match in matches:
+            title = match.entry.name if match.entry else _unknown_prompt_title(match)
             lines.extend(_match_markdown(title, match))
     return "\n".join(lines).rstrip() + "\n"
 
@@ -286,7 +300,15 @@ def _group_matches(matches: tuple[StaticPromptMatch, ...]) -> list[tuple[str, li
     for match in matches:
         category = match.entry.category if match.entry else "unknown"
         groups.setdefault(category, []).append(match)
+    for group_matches in groups.values():
+        group_matches.sort(key=_match_sort_key)
     return sorted(groups.items(), key=lambda item: (_category_sort(item[0]), item[0]))
+
+
+def _match_sort_key(match: StaticPromptMatch) -> tuple[str, int]:
+    if match.entry is not None:
+        return (match.entry.name.lower(), match.candidate.order)
+    return (_unknown_prompt_title(match), match.candidate.order)
 
 
 def _category_sort(category: str) -> int:
@@ -318,5 +340,54 @@ def _match_markdown(title: str, match: StaticPromptMatch) -> list[str]:
     return lines
 
 
+def _unknown_prompt_title(match: StaticPromptMatch) -> str:
+    digest = content_hash(normalize_static_prompt_markdown_content(match.candidate.content))[:8]
+    return f"Unknown static prompt {digest}"
+
+
 def normalize_static_prompt_markdown_content(content: str) -> str:
-    return STATIC_PROMPT_VARIABLE_RE.sub("${}", content).replace("\t", "    ")
+    ternaries: list[str] = []
+    value = STATIC_PROMPT_DOUBLE_TERNARY_EXPR_RE.sub(
+        lambda match: _stash_ternary(ternaries, _normalize_double_ternary_expr(match)), content
+    )
+    value = STATIC_PROMPT_SINGLE_TERNARY_EXPR_RE.sub(
+        lambda match: _stash_ternary(ternaries, _normalize_single_ternary_expr(match)), value
+    )
+    value = STATIC_PROMPT_DOUBLE_STRING_EXPR_RE.sub(lambda match: match.group("value"), value)
+    value = STATIC_PROMPT_SINGLE_STRING_EXPR_RE.sub(lambda match: match.group("value"), value)
+    value = STATIC_PROMPT_TERNARY_PREFIX_RE.sub("__PHISTORY_STATIC_TERNARY_PREFIX__", value)
+    value = STATIC_PROMPT_SIMPLE_TERNARY_NAME_RE.sub("__PHISTORY_STATIC_SIMPLE_TERNARY__", value)
+    value = STATIC_PROMPT_VARIABLE_RE.sub("${}", value)
+    value = STATIC_PROMPT_DOUBLE_TERNARY_RE.sub(lambda match: match.group("branch"), value)
+    value = STATIC_PROMPT_SINGLE_TERNARY_RE.sub(lambda match: match.group("branch"), value)
+    value = value.replace("__PHISTORY_STATIC_TERNARY_PREFIX__", "${?")
+    value = value.replace("__PHISTORY_STATIC_SIMPLE_TERNARY__", "${?}")
+    for index, replacement in enumerate(ternaries):
+        value = value.replace(f"__PHISTORY_STATIC_TERNARY_{index}__", replacement)
+    value = STATIC_PROMPT_JOIN_EXPR_RE.sub("${[].join(", value)
+    value = STATIC_PROMPT_MAP_EXPR_RE.sub("${[].map(($)=>", value)
+    value = STATIC_PROMPT_SIMPLE_TERNARY_NAME_RE.sub("${?}", value)
+    value = value.replace("\t", "    ")
+    return "\n".join(line.rstrip() for line in value.split("\n"))
+
+
+def _stash_ternary(ternaries: list[str], value: str) -> str:
+    token = f"__PHISTORY_STATIC_TERNARY_{len(ternaries)}__"
+    ternaries.append(value)
+    return token
+
+
+def _normalize_double_ternary_expr(match: re.Match[str]) -> str:
+    return _normalize_ternary_expr(match, quote='"')
+
+
+def _normalize_single_ternary_expr(match: re.Match[str]) -> str:
+    return _normalize_ternary_expr(match, quote="'")
+
+
+def _normalize_ternary_expr(match: re.Match[str], *, quote: str) -> str:
+    yes = match.group("yes")
+    no = match.group("no")
+    if yes == no:
+        return yes
+    return f"${{? {quote}{yes}{quote} : {quote}{no}{quote}}}"

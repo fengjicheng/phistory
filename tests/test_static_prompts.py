@@ -3,10 +3,11 @@ from phistory.static_prompts.extract import (
     _keep_known_or_prompt_like,
     normalize_static_prompt_markdown_content,
     read_static_candidates,
+    render_static_prompts_markdown,
     write_static_candidates,
 )
 from phistory.static_prompts.javascript import extract_prompt_candidates, extract_string_candidates
-from phistory.static_prompts.models import StaticCandidatesResult
+from phistory.static_prompts.models import StaticCandidatesResult, StaticPromptMatch, StaticPromptResult
 
 
 def test_javascript_prompt_extraction_skips_comments_and_matches_known_catalog():
@@ -64,6 +65,65 @@ def test_catalog_matching_normalizes_template_variable_names():
 
 def test_static_prompt_markdown_normalizes_template_variable_names():
     assert normalize_static_prompt_markdown_content("Use ${Yh} and ${zh} now") == "Use ${} and ${} now"
+
+
+def test_static_prompt_markdown_collapses_duplicate_template_ternary():
+    content = '${Xxo()?"Confirm first.":"Confirm first."} Then proceed.'
+
+    assert normalize_static_prompt_markdown_content(content) == "Confirm first. Then proceed."
+
+
+def test_static_prompt_markdown_preserves_template_ternary_branches_without_variable_noise():
+    content = '${Xxo()?"Confirm first.":"Proceed without asking."} Then report.'
+
+    assert (
+        normalize_static_prompt_markdown_content(content)
+        == '${? "Confirm first." : "Proceed without asking."} Then report.'
+    )
+
+
+def test_static_prompt_markdown_inlines_constant_string_substitutions():
+    content = '${"Use the tools carefully."} Then stop.'
+
+    assert normalize_static_prompt_markdown_content(content) == "Use the tools carefully. Then stop."
+
+
+def test_static_prompt_markdown_normalizes_residual_ternary_prefix():
+    content = "${Su()?````\ngit commit\n````:''}"
+
+    assert normalize_static_prompt_markdown_content(content) == "${?````\ngit commit\n````:''}"
+
+
+def test_static_prompt_markdown_normalizes_common_minified_iterator_names():
+    content = "${B1r.join(`\nnext\n${c.map((R)=>`- ${}`).join(`\n`)} Use ${?jw:oR}."
+
+    assert (
+        normalize_static_prompt_markdown_content(content)
+        == "${[].join(`\nnext\n${[].map(($)=>`- ${}`).join(`\n`)} Use ${?}."
+    )
+
+
+def test_unknown_static_prompt_title_uses_stable_normalized_hash():
+    first = extract_string_candidates(
+        "const prompt = 'You must write a concise plan for the user before editing files.';", min_length=20
+    )[0]
+    second = extract_string_candidates(
+        "const prompt = 'You must write a concise plan for the user before editing files.';", min_length=20
+    )[0]
+    result = StaticPromptResult(
+        agent_id="claude-code",
+        version="1.2.3",
+        source="node_modules/@anthropic-ai/claude-code/bin/claude.exe",
+        matches=(
+            StaticPromptMatch(first, None, "unknown", "test"),
+            StaticPromptMatch(second, None, "unknown", "test"),
+        ),
+    )
+
+    markdown = render_static_prompts_markdown(result)
+
+    assert "Unknown static prompt 1" not in markdown
+    assert markdown.count("### Unknown static prompt ") == 2
 
 
 def test_static_candidates_roundtrip(tmp_path):
