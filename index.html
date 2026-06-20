@@ -319,8 +319,7 @@ a:hover { text-decoration: none; }
   overscroll-behavior: contain;
 }
 #diff { position: absolute; inset: 0; }
-.trace-view,
-.static-view {
+.trace-view {
   position: absolute;
   inset: 0;
   display: none;
@@ -332,44 +331,25 @@ a:hover { text-decoration: none; }
   scrollbar-color: var(--scrollbar) transparent;
   background: var(--bg);
 }
-.trace-view::-webkit-scrollbar,
-.static-view::-webkit-scrollbar { width: 8px; height: 8px; }
-.trace-view::-webkit-scrollbar-track,
-.static-view::-webkit-scrollbar-track { background: transparent; }
-.trace-view::-webkit-scrollbar-thumb,
-.static-view::-webkit-scrollbar-thumb {
+.trace-view::-webkit-scrollbar { width: 8px; height: 8px; }
+.trace-view::-webkit-scrollbar-track { background: transparent; }
+.trace-view::-webkit-scrollbar-thumb {
   background: var(--scrollbar);
   border-radius: 999px;
 }
-.shell[data-view="trace"] #diff,
-.shell[data-view="static"] #diff { display: none; }
+.shell[data-view="trace"] #diff { display: none; }
 .shell[data-view="trace"] .trace-view { display: block; }
-.shell[data-view="static"] .static-view { display: block; }
 .shell[data-view="trace"] .compare {
   grid-template-columns: 236px;
 }
-.shell[data-view="static"] .compare {
-  grid-template-columns: 236px;
-}
 .shell[data-view="trace"] #from,
-.shell[data-view="trace"] .arrow,
-.shell[data-view="static"] #from,
-.shell[data-view="static"] .arrow {
+.shell[data-view="trace"] .arrow {
   display: none;
 }
 .trace-page {
   max-width: 1120px;
   margin: 0 auto;
   padding: 22px 22px 42px;
-}
-.static-page {
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 22px 22px 52px;
-}
-.static-page .trace-rendered {
-  padding: 0;
-  background: transparent;
 }
 .trace-hero {
   border-bottom: 1px solid var(--line);
@@ -963,11 +943,7 @@ a:hover { text-decoration: none; }
   .shell[data-view="trace"] .compare {
     grid-template-columns: minmax(0, 1fr);
   }
-  .shell[data-view="static"] .compare {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .trace-page,
-  .static-page {
+  .trace-page {
     padding: 18px 14px 34px;
   }
   .trace-title h2 {
@@ -1055,7 +1031,6 @@ a:hover { text-decoration: none; }
   <main class="editor">
     <div id="diff"><div class="empty">Loading diff viewer...</div></div>
     <div id="trace" class="trace-view"><div class="empty">Loading trace detail...</div></div>
-    <div id="static" class="static-view"><div class="empty">Loading static prompts...</div></div>
   </main>
 </div>
 <div id="popover" class="popover">
@@ -1076,7 +1051,6 @@ const els = {
   theme: document.getElementById('theme'),
   diff: document.getElementById('diff'),
   trace: document.getElementById('trace'),
-  static: document.getElementById('static'),
   popover: document.getElementById('popover'),
   options: document.getElementById('options')
 };
@@ -1128,13 +1102,24 @@ function readQuery() {
   const agentId = params.get('agent');
   if (agentId && agents.has(agentId)) state.agent = agentId;
   const agent = currentAgent();
-  if (state.view === 'trace' || state.view === 'static') {
+  if (state.view === 'trace') {
     const version = params.get('version') || params.get('to');
     state.to = hasVersion(agent, version) ? version : agent.latest.version;
     state.from = previousVersion(agent, state.to).version;
     state.followLatest = !params.has('version') && !params.has('to');
     return;
   }
+  if (state.view === 'static' && params.has('version') && !params.has('from') && !params.has('to')) {
+    state.to = hasVersion(agent, params.get('version')) ? params.get('version') : agent.latest.version;
+    state.from = previousVersion(agent, state.to).version;
+    state.followLatest = false;
+    state.normalizeQuery = true;
+    return;
+  }
+  readRangeQuery(params, agent);
+}
+
+function readRangeQuery(params, agent) {
   const to = params.get('to');
   const from = params.get('from');
   const hasPinnedVersions = params.has('from') || params.has('to');
@@ -1151,12 +1136,18 @@ function readQuery() {
 }
 
 function writeQuery() {
-  const params = state.view === 'trace' || state.view === 'static'
+  const params = state.view === 'trace'
     ? new URLSearchParams({ view: state.view, agent: state.agent, version: state.to })
-    : (state.followLatest
-      ? new URLSearchParams({ agent: state.agent, range: 'latest' })
-      : new URLSearchParams({ agent: state.agent, from: state.from, to: state.to }));
+    : rangeQueryParams();
   history.replaceState(null, '', `${location.pathname}?${params.toString()}`);
+}
+
+function rangeQueryParams() {
+  const params = state.followLatest
+    ? new URLSearchParams({ agent: state.agent, range: 'latest' })
+    : new URLSearchParams({ agent: state.agent, from: state.from, to: state.to });
+  if (state.view === 'static') params.set('view', 'static');
+  return params;
 }
 
 function bindEvents() {
@@ -1318,7 +1309,7 @@ function selectOption(value) {
   if (state.picker === 'agent') {
     state.agent = value;
     const agent = currentAgent();
-    if (state.view === 'trace' || state.view === 'static') {
+    if (state.view === 'trace') {
       state.to = agent.latest.version;
       state.from = previousVersion(agent, state.to).version;
       state.followLatest = true;
@@ -1333,7 +1324,7 @@ function selectOption(value) {
   } else if (state.picker === 'to') {
     state.followLatest = false;
     state.to = value;
-    if (state.view === 'trace' || state.view === 'static') {
+    if (state.view === 'trace') {
       state.from = previousVersion(currentAgent(), state.to).version;
     } else {
       normalizeVersionRange(currentAgent(), 'to');
@@ -1356,7 +1347,7 @@ function refreshView() {
     return;
   }
   if (state.view === 'static') {
-    renderStatic().catch(showError);
+    loadMonaco().then(renderStatic).catch(showError);
     return;
   }
   loadMonaco().then(renderDiff).catch(showError);
@@ -1364,7 +1355,7 @@ function refreshView() {
 
 function toggleView() {
   state.view = nextView();
-  if (state.view === 'trace' || state.view === 'static') {
+  if (state.view === 'trace') {
     state.from = previousVersion(currentAgent(), state.to).version;
   }
   refresh();
@@ -1393,18 +1384,18 @@ function loadMonaco() {
 
 async function renderDiff() {
   if (!state.monaco) return;
-  const monaco = state.monaco;
   const [from, to] = [versionInfo(state.from), versionInfo(state.to)];
   const [original, modified] = await Promise.all([loadPrompt(from), loadPrompt(to)]);
+  renderMonacoDiff(original, modified);
+}
+
+function renderMonacoDiff(original, modified) {
+  if (!state.monaco) return;
+  const monaco = state.monaco;
   const originalModel = monaco.editor.createModel(original, 'markdown');
   const modifiedModel = monaco.editor.createModel(modified, 'markdown');
 
-  if (state.editor) {
-    const model = state.editor.getModel();
-    state.editor.dispose();
-    model?.original?.dispose();
-    model?.modified?.dispose();
-  }
+  disposeEditor();
 
   els.diff.innerHTML = '';
   const isNarrow = matchMedia('(max-width: 880px)').matches;
@@ -1443,6 +1434,15 @@ async function renderDiff() {
   state.editor.setModel({ original: originalModel, modified: modifiedModel });
   hardenMobileEditorInputs();
   requestAnimationFrame(hardenMobileEditorInputs);
+}
+
+function disposeEditor() {
+  if (!state.editor) return;
+  const model = state.editor.getModel();
+  state.editor.dispose();
+  model?.original?.dispose();
+  model?.modified?.dispose();
+  state.editor = null;
 }
 
 function hardenMobileEditorInputs() {
@@ -1507,13 +1507,14 @@ async function renderTrace() {
 }
 
 async function renderStatic() {
-  const item = versionInfo(state.to);
-  const markdown = await loadStaticPrompts(item);
-  if (!markdown) {
-    els.static.innerHTML = '<div class="empty">No static prompts extracted for this version.</div>';
+  const [from, to] = [versionInfo(state.from), versionInfo(state.to)];
+  if (!from.static_prompts || !to.static_prompts) {
+    disposeEditor();
+    els.diff.innerHTML = `<div class="empty">Static prompts are only available for captures with <code>static-prompts.md</code>.</div>`;
     return;
   }
-  els.static.innerHTML = staticPromptsHtml(item, markdown);
+  const [original, modified] = await Promise.all([loadStaticPrompts(from), loadStaticPrompts(to)]);
+  renderMonacoDiff(staticPromptBodyMarkdown(original), staticPromptBodyMarkdown(modified));
 }
 
 function selectMainTraceRecord(records) {
@@ -1766,19 +1767,6 @@ function toggleTracePanel(summary) {
 function setTracePanelOpen(panel, open) {
   panel.classList.toggle('is-open', open);
   panel.querySelector(':scope > .trace-summary')?.setAttribute('aria-expanded', String(open));
-}
-
-function staticPromptsHtml(item, markdown) {
-  const title = `${currentAgent().name} ${item.version}`;
-  const body = staticPromptBodyMarkdown(markdown);
-  return `<article class="static-page">
-    <header class="trace-hero">
-      <div class="trace-eyebrow">Static prompts</div>
-      <div class="trace-title"><h2>${escapeHtml(title)}</h2><span>${escapeHtml(item.published_compact)}</span></div>
-      <div class="trace-meta">${item.published_display ? metaItem('Published', item.published_display) : ''}${item.captured_display ? metaItem('Captured', item.captured_display) : ''}${item.static_prompts_json ? metaItem('Data', 'static-prompts.json') : ''}</div>
-    </header>
-    <div class="trace-rendered">${markdownHtml(body)}</div>
-  </article>`;
 }
 
 function staticPromptBodyMarkdown(markdown) {
