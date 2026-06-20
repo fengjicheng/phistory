@@ -1,4 +1,5 @@
 import difflib
+import hashlib
 import json
 from datetime import datetime, timezone
 from pathlib import Path
@@ -67,11 +68,21 @@ def _site_row(row: dict) -> dict:
         "published_display": _display_time(row["published_at"]),
         "captured_display": _display_time(row.get("captured_at") or ""),
         "prompt": row["prompt"].as_posix(),
+        "prompt_fingerprint": _file_fingerprint(row["prompt"]),
         "trace": row["trace"].as_posix(),
+        "trace_fingerprint": _file_fingerprint(row["trace"]),
         "static_prompts": row["static_prompts"].as_posix() if row.get("static_prompts") else "",
+        "static_prompts_fingerprint": _file_fingerprint(row["static_prompts"]) if row.get("static_prompts") else "",
         "static_prompts_json": row["static_prompts_json"].as_posix() if row.get("static_prompts_json") else "",
         "static_candidates_json": row["static_candidates_json"].as_posix() if row.get("static_candidates_json") else "",
     }
+
+
+def _file_fingerprint(path: Path) -> str:
+    try:
+        return hashlib.sha256(path.read_bytes()).hexdigest()[:16]
+    except OSError:
+        return ""
 
 
 def _change_summary(current: dict, previous: dict | None) -> dict:
@@ -1854,11 +1865,18 @@ async function loadStaticPrompts(item) {
 
 function captureAssetUrl(item, path) {
   const url = new URL(path, window.location.href);
-  url.searchParams.set('v', captureAssetVersion(item));
+  url.searchParams.set('v', captureAssetVersion(item, path));
   return url.pathname + url.search;
 }
 
-function captureAssetVersion(item) {
+function captureAssetVersion(item, path) {
+  if (path === item.prompt) return item.prompt_fingerprint || fallbackAssetVersion(item);
+  if (path === item.trace) return item.trace_fingerprint || fallbackAssetVersion(item);
+  if (path === item.static_prompts) return item.static_prompts_fingerprint || fallbackAssetVersion(item);
+  return fallbackAssetVersion(item);
+}
+
+function fallbackAssetVersion(item) {
   return [item.agent_id, item.version, item.published_compact, item.captured_display].filter(Boolean).join('-');
 }
 
