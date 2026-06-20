@@ -1638,33 +1638,46 @@ function guardMobileEditorFocus(event) {
 }
 
 async function loadPrompt(item) {
-  if (state.cache.has(item.prompt)) return state.cache.get(item.prompt);
-  const response = await fetch(item.prompt);
+  const url = captureAssetUrl(item, item.prompt);
+  if (state.cache.has(url)) return state.cache.get(url);
+  const response = await fetch(url);
   if (!response.ok) throw new Error(`Unable to load ${item.prompt}`);
   const text = await response.text();
-  state.cache.set(item.prompt, text);
+  state.cache.set(url, text);
   return text;
 }
 
 async function loadTrace(item) {
   if (!item.trace) throw new Error('This capture has no trace path.');
-  if (state.traceCache.has(item.trace)) return state.traceCache.get(item.trace);
-  const response = await fetch(item.trace);
+  const url = captureAssetUrl(item, item.trace);
+  if (state.traceCache.has(url)) return state.traceCache.get(url);
+  const response = await fetch(url);
   if (!response.ok) throw new Error(`Unable to load ${item.trace}`);
   const text = await response.text();
   const records = text.split(/\n+/).filter(Boolean).map(line => JSON.parse(line));
-  state.traceCache.set(item.trace, records);
+  state.traceCache.set(url, records);
   return records;
 }
 
 async function loadStaticPrompts(item) {
   if (!item.static_prompts) return '';
-  if (state.staticCache.has(item.static_prompts)) return state.staticCache.get(item.static_prompts);
-  const response = await fetch(item.static_prompts);
+  const url = captureAssetUrl(item, item.static_prompts);
+  if (state.staticCache.has(url)) return state.staticCache.get(url);
+  const response = await fetch(url);
   if (!response.ok) throw new Error(`Unable to load ${item.static_prompts}`);
   const text = await response.text();
-  state.staticCache.set(item.static_prompts, text);
+  state.staticCache.set(url, text);
   return text;
+}
+
+function captureAssetUrl(item, path) {
+  const url = new URL(path, window.location.href);
+  url.searchParams.set('v', captureAssetVersion(item));
+  return url.pathname + url.search;
+}
+
+function captureAssetVersion(item) {
+  return [item.agent_id, item.version, item.published_compact, item.captured_display].filter(Boolean).join('-');
 }
 
 async function renderTrace() {
