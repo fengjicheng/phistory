@@ -1,7 +1,7 @@
 {
   "description": "Phistory automatically archives versioned system prompt snapshots from agent CLIs like Claude Code, Codex, OpenClaw, Hermes, Kimi, opencode, and Pi.",
   "site": "https://phistory.cc/",
-  "updated_at": "2026-06-20T21:52:13.389833Z",
+  "updated_at": "2026-06-21T05:30:04.261281Z",
   "agents": [
     {
       "agent_id": "claude-code",
@@ -38,18 +38,18 @@
     {
       "agent_id": "openclaw",
       "agent": "OpenClaw",
-      "latest_version": "2026.6.8",
-      "latest_published_at": "2026-06-16T16:27:41.596Z",
-      "latest_captured_at": "2026-06-16T17:36:39.870858+00:00",
-      "captures": 64
+      "latest_version": "2026.6.9",
+      "latest_published_at": "2026-06-21T01:37:53.047Z",
+      "latest_captured_at": "2026-06-21T05:29:54.383251+00:00",
+      "captures": 65
     },
     {
       "agent_id": "opencode",
       "agent": "opencode",
-      "latest_version": "1.17.8",
-      "latest_published_at": "2026-06-17T21:24:39.626Z",
-      "latest_captured_at": "2026-06-17T22:24:22.816220+00:00",
-      "captures": 74
+      "latest_version": "1.17.9",
+      "latest_published_at": "2026-06-21T00:00:55.044Z",
+      "latest_captured_at": "2026-06-21T05:30:04.261281+00:00",
+      "captures": 75
     },
     {
       "agent_id": "pi",
@@ -290,6 +290,16 @@
       "prompt": "captures/pi/0.74.0/prompt.md",
       "trace": "captures/pi/0.74.0/trace.jsonl",
       "meta": "captures/pi/0.74.0/meta.json"
+    },
+    {
+      "agent_id": "opencode",
+      "agent": "opencode",
+      "version": "1.17.9",
+      "published_at": "2026-06-21T00:00:55.044Z",
+      "captured_at": "2026-06-21T05:30:04.261281+00:00",
+      "prompt": "captures/opencode/1.17.9/prompt.md",
+      "trace": "captures/opencode/1.17.9/trace.jsonl",
+      "meta": "captures/opencode/1.17.9/meta.json"
     },
     {
       "agent_id": "opencode",
@@ -1030,6 +1040,16 @@
       "prompt": "captures/opencode/1.4.0/prompt.md",
       "trace": "captures/opencode/1.4.0/trace.jsonl",
       "meta": "captures/opencode/1.4.0/meta.json"
+    },
+    {
+      "agent_id": "openclaw",
+      "agent": "OpenClaw",
+      "version": "2026.6.9",
+      "published_at": "2026-06-21T01:37:53.047Z",
+      "captured_at": "2026-06-21T05:29:54.383251+00:00",
+      "prompt": "captures/openclaw/2026.6.9/prompt.md",
+      "trace": "captures/openclaw/2026.6.9/trace.jsonl",
+      "meta": "captures/openclaw/2026.6.9/meta.json"
     },
     {
       "agent_id": "openclaw",
