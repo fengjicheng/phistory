@@ -1,23 +1,23 @@
 {
   "description": "Phistory automatically archives versioned system prompt snapshots from agent CLIs like Claude Code, Codex, OpenClaw, Hermes, Kimi, opencode, and Pi.",
   "site": "https://phistory.cc/",
-  "updated_at": "2026-06-25T22:09:25.295053Z",
+  "updated_at": "2026-06-26T21:51:53.002476Z",
   "agents": [
     {
       "agent_id": "claude-code",
       "agent": "Claude Code",
-      "latest_version": "2.1.193",
-      "latest_published_at": "2026-06-25T19:05:08.367Z",
-      "latest_captured_at": "2026-06-25T22:09:25.295053+00:00",
-      "captures": 351
+      "latest_version": "2.1.195",
+      "latest_published_at": "2026-06-26T18:16:23.150Z",
+      "latest_captured_at": "2026-06-26T21:51:48.018070+00:00",
+      "captures": 352
     },
     {
       "agent_id": "codex",
       "agent": "Codex CLI",
-      "latest_version": "0.142.2",
-      "latest_published_at": "2026-06-25T07:34:58.281Z",
-      "latest_captured_at": "2026-06-25T09:56:49.941188+00:00",
-      "captures": 59
+      "latest_version": "0.142.3",
+      "latest_published_at": "2026-06-26T21:32:08.704Z",
+      "latest_captured_at": "2026-06-26T21:51:53.002476+00:00",
+      "captures": 60
     },
     {
       "agent_id": "hermes",
@@ -2114,6 +2114,16 @@
     {
       "agent_id": "codex",
       "agent": "Codex CLI",
+      "version": "0.142.3",
+      "published_at": "2026-06-26T21:32:08.704Z",
+      "captured_at": "2026-06-26T21:51:53.002476+00:00",
+      "prompt": "captures/codex/0.142.3/prompt.md",
+      "trace": "captures/codex/0.142.3/trace.jsonl",
+      "meta": "captures/codex/0.142.3/meta.json"
+    },
+    {
+      "agent_id": "codex",
+      "agent": "Codex CLI",
       "version": "0.142.2",
       "published_at": "2026-06-25T07:34:58.281Z",
       "captured_at": "2026-06-25T09:56:49.941188+00:00",
@@ -2700,6 +2710,19 @@
       "prompt": "captures/codex/0.80.0/prompt.md",
       "trace": "captures/codex/0.80.0/trace.jsonl",
       "meta": "captures/codex/0.80.0/meta.json"
+    },
+    {
+      "agent_id": "claude-code",
+      "agent": "Claude Code",
+      "version": "2.1.195",
+      "published_at": "2026-06-26T18:16:23.150Z",
+      "captured_at": "2026-06-26T21:51:48.018070+00:00",
+      "prompt": "captures/claude-code/2.1.195/prompt.md",
+      "trace": "captures/claude-code/2.1.195/trace.jsonl",
+      "meta": "captures/claude-code/2.1.195/meta.json",
+      "static_prompts": "captures/claude-code/2.1.195/static-prompts.md",
+      "static_prompts_json": "captures/claude-code/2.1.195/static-prompts.json",
+      "static_candidates_json": "captures/claude-code/2.1.195/static-candidates.json"
     },
     {
       "agent_id": "claude-code",
