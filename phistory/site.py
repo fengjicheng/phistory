@@ -4,6 +4,7 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+from phistory.registry import agent_sort_key
 from phistory.render import _version_key, read_capture_rows
 
 AGENT_ICONS = {
@@ -29,7 +30,7 @@ def render_site(root: Path, output: Path) -> None:
 def _build_manifest(root: Path) -> dict:
     rows = read_capture_rows(root)
     agents = []
-    for agent_id in sorted({row["agent_id"] for row in rows}):
+    for agent_id in sorted({row["agent_id"] for row in rows}, key=agent_sort_key):
         agent_rows = sorted(
             [row for row in rows if row["agent_id"] == agent_id],
             key=lambda row: _version_key(row["version"]),

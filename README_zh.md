@@ -36,7 +36,7 @@ GitHub Actions 每小时检查一次支持的 CLI 版本；发现新版本后，
 uv sync --all-groups
 
 # 抓取所有受支持 CLI 的最新版本。
-uv run phistory capture --latest --agents antigravity,claude-code,codex,openclaw,hermes,kimi,opencode,pi
+uv run phistory capture --latest --agents claude-code,codex,antigravity,openclaw,hermes,kimi,opencode,pi
 
 # 回填某个 agent 的历史版本区间。
 uv run phistory backfill claude-code --from 2.1.113 --to latest
@@ -68,12 +68,12 @@ uv run phistory render-site
 
 | Agent | 最新版本 | 快照数 | 最近抓取 |
 | --- | --- | ---: | --- |
-| Antigravity CLI | [1.0.13 - 2026-06-27](captures/antigravity/1.0.13/prompt.md) | 10 | 2026-06-27 06:41 UTC |
 | Claude Code | [2.1.195 - 2026-06-26](captures/claude-code/2.1.195/prompt.md) | 352 | 2026-06-26 21:51 UTC |
 | Codex CLI | [0.142.3 - 2026-06-26](captures/codex/0.142.3/prompt.md) | 60 | 2026-06-26 21:51 UTC |
+| Antigravity CLI | [1.0.13 - 2026-06-27](captures/antigravity/1.0.13/prompt.md) | 10 | 2026-06-27 06:41 UTC |
+| OpenClaw | [2026.6.10 - 2026-06-24](captures/openclaw/2026.6.10/prompt.md) | 66 | 2026-06-24 04:50 UTC |
 | Hermes Agent | [v2026.6.19 - 2026-06-19](captures/hermes/v2026.6.19/prompt.md) | 16 | 2026-06-19 19:52 UTC |
 | Kimi CLI | [1.48.0 - 2026-06-22](captures/kimi/1.48.0/prompt.md) | 20 | 2026-06-22 17:19 UTC |
-| OpenClaw | [2026.6.10 - 2026-06-24](captures/openclaw/2026.6.10/prompt.md) | 66 | 2026-06-24 04:50 UTC |
 | opencode | [1.17.11 - 2026-06-25](captures/opencode/1.17.11/prompt.md) | 77 | 2026-06-25 12:40 UTC |
 | Pi | [0.80.2 - 2026-06-23](captures/pi/0.80.2/prompt.md) | 26 | 2026-06-23 23:39 UTC |
 

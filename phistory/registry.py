@@ -219,8 +219,16 @@ PI = AgentSpec(
 )
 
 AGENTS: dict[str, AgentSpec] = {
-    agent.id: agent for agent in (ANTIGRAVITY, CLAUDE_CODE, CODEX, HERMES, KIMI, OPENCLAW, OPENCODE, PI)
+    agent.id: agent for agent in (CLAUDE_CODE, CODEX, ANTIGRAVITY, OPENCLAW, HERMES, KIMI, OPENCODE, PI)
 }
+AGENT_ORDER = tuple(AGENTS)
+
+
+def agent_sort_key(agent_id: str) -> tuple[int, str]:
+    try:
+        return (AGENT_ORDER.index(agent_id), "")
+    except ValueError:
+        return (len(AGENT_ORDER), agent_id)
 
 
 def get_agent(agent_id: str) -> AgentSpec:
@@ -233,7 +241,7 @@ def get_agent(agent_id: str) -> AgentSpec:
 
 def parse_agent_ids(value: str | None) -> list[str]:
     if not value:
-        return sorted(AGENTS)
+        return list(AGENT_ORDER)
     ids = [item.strip() for item in value.split(",") if item.strip()]
     for agent_id in ids:
         get_agent(agent_id)

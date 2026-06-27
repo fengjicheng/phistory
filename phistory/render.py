@@ -7,6 +7,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from phistory.registry import agent_sort_key
+
 _VERSION_PART_RE = re.compile(r"\d+|[A-Za-z]+")
 
 PROJECT_DESCRIPTION = (
@@ -126,7 +128,7 @@ def _readme_markdown(rows: list[dict[str, Any]], base: Path) -> str:
             "uv sync --all-groups",
             "",
             "# Capture the latest supported CLI releases.",
-            "uv run phistory capture --latest --agents antigravity,claude-code,codex,openclaw,hermes,kimi,opencode,pi",
+            "uv run phistory capture --latest --agents claude-code,codex,antigravity,openclaw,hermes,kimi,opencode,pi",
             "",
             "# Capture a historical version range for one agent.",
             "uv run phistory backfill claude-code --from 2.1.113 --to latest",
@@ -247,7 +249,7 @@ def _readme_zh_markdown(rows: list[dict[str, Any]], base: Path) -> str:
             "uv sync --all-groups",
             "",
             "# 抓取所有受支持 CLI 的最新版本。",
-            "uv run phistory capture --latest --agents antigravity,claude-code,codex,openclaw,hermes,kimi,opencode,pi",
+            "uv run phistory capture --latest --agents claude-code,codex,antigravity,openclaw,hermes,kimi,opencode,pi",
             "",
             "# 回填某个 agent 的历史版本区间。",
             "uv run phistory backfill claude-code --from 2.1.113 --to latest",
@@ -470,7 +472,7 @@ def _agent_status_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     for agent_id, agent_rows in by_agent.items():
         latest = max(agent_rows, key=lambda item: _version_key(item["version"]))
         status.append({"agent_id": agent_id, "latest": latest, "count": len(agent_rows)})
-    return sorted(status, key=lambda item: item["agent_id"])
+    return sorted(status, key=lambda item: agent_sort_key(item["agent_id"]))
 
 
 def _sorted_capture_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:

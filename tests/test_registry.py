@@ -3,12 +3,12 @@ from phistory.registry import get_agent, parse_agent_ids
 
 def test_parse_default_agents():
     assert parse_agent_ids(None) == [
-        "antigravity",
         "claude-code",
         "codex",
+        "antigravity",
+        "openclaw",
         "hermes",
         "kimi",
-        "openclaw",
         "opencode",
         "pi",
     ]
